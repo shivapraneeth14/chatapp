@@ -1,9 +1,12 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 
 function Notification() {
+    useEffect(()=>{
+    
+    })
   return (
     <div className=''>
-      <div className=' overflow-hidden absolute  right-14 w-56  rounded-xl bg-slate-700  min-h-16'>
+      <div className='   w-56  rounded-xl  bg-slate-700  min-h-16'>
        
       </div>
     </div>

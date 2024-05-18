@@ -108,11 +108,11 @@ const getuserprofile =async (req,res)=>{
        .json({message:"no user found"})
       }
       console.log("backend successful")
-      res.status(200).json({user})
+     return res.status(200).json({user})
       
  } catch (error) {
     console.log(error)
-    res.status(400).json({message:"internal sever error"})
+    return res.status(400).json({message:"internal sever error"})
  }
 }
 const logout = async (req, res) => {
@@ -168,15 +168,15 @@ const changepassword = async (req, res) => {
       const newhasedpassword = await bcrypt.hash(newpassword,saltroundes)
       console.log(newhasedpassword)
       if(!newhasedpassword){
-        res.status(400).json({message:"no new password is hashed"})
+         return res.status(400).json({message:"no new password is hashed"})
       }
  
       user.password = newhasedpassword;
       await user.save();
-      res.status(200).json({ message: "Password changed successfully" });
+      return res.status(200).json({ message: "Password changed successfully" });
     } catch (error) {
      console.error("Password change error:", error);
-     res.status(500).json({ message: "Internal server error" });
+     return res.status(500).json({ message: "Internal server error" });
     }
  }
  const uploadprofiepic = async (req, res) => {
@@ -216,12 +216,12 @@ const changepassword = async (req, res) => {
     console.log(searchkey);
      const users = await User.find()
      if(!users){
-         res.status(400).json({message:"no users in database"})
+       return  res.status(400).json({message:"no users in database"})
      }
      const usernames = users.map(user => user.username)
      const filteredresult = usernames.filter(username=> username.toLowerCase().includes(searchkey))
      console.log(filteredresult)
-     res.status(200).json({mesaage:"all users",filteredresult })
+     return res.status(200).json({mesaage:"all users",filteredresult })
    } catch (error) {
    }
   }
@@ -230,34 +230,41 @@ const changepassword = async (req, res) => {
         const username = req.params.username
         console.log("backend username ",username)
         if(!username){
-            res.status(400).json({mesaage:"cannot get the profile no username"})
+           return  res.status(400).json({mesaage:"cannot get the profile no username"})
         }
         const user  = await User.findOne({username})
         console.log(user)
         if(!user){
-            res.status(400).json({message:"no user found on the username "})
+           return res.status(400).json({message:"no user found on the username "})
         }
-        res.status(200).json({user})
+       return res.status(200).json({user})
     } catch (error) {
         console.log(error)
-        res.status(400).json({message:"internal server error"})
+       return res.status(400).json({message:"internal server error"})
     }
 
   }
  const getcurrentuser= async (req,res)=>{
     console.log(req.user._id)
-    res.status(200)
+   return  res.status(200)
      .json({message:"current user", user:req.user})
  }
 
  const Addfriend = async (req, res) => {
+    console.log("backend")
     try {
         const { userid, friendid } = req.body;
+        if(!userid || !friendid){
+            return res.status(400).json({message:"user id and frined id not found in backend "})
+        }
         const newFriend = new Friends({
             Following: userid,  
             Followers: friendid
         });
        const savedfriend =  await newFriend.save();
+       if(!savedfriend){
+        return res.status(400).json({message:"saved frined not found in backedn"})
+       }
        const requesid = savedfriend._id
        console.log("savedfrined",requesid)
 
@@ -266,13 +273,16 @@ const changepassword = async (req, res) => {
             message: 'You have a new friend request'
         });
         const savedNotification = await newNotification.save(); 
+        if(!savedNotification){
+            return res.status(400).json({message:"saved notification not found in backedn"})
+           }
         const notificationId = savedNotification._id;
         console.log("notification id",notificationId)
 
-        res.status(200).json({ message: 'Friend request sent', friend: newFriend._id, notification: newNotification._id  });
+       return res.status(200).json({ message: 'Friend request sent', friend: newFriend._id, notification: newNotification._id  });
     } catch (error) {
         console.log("Backend add friend", error);
-        res.status(400).json({ message: "Unable to send friend request" });
+       return res.status(400).json({ message: "Unable to send friend request" });
     }
 };
 
@@ -290,10 +300,10 @@ const Acceptfriend = async (req, res) => {
         await notification.save();
         console.log(notification)
 
-        res.status(200).json({ message: "New friend added" });
+       return  res.status(200).json({ message: "New friend added" });
     } catch (error) {
         console.log("Backend accept friend", error);
-        res.status(400).json({ message: "Unable to accept friend request" });
+       return res.status(400).json({ message: "Unable to accept friend request" });
     }
 };
 
@@ -311,17 +321,16 @@ const Declinefriend = async(req,res)=>{
         await notification.save();
         console.log(notification)
 
-        res.status(200).json({ message: "declined the friend request" });
+       return res.status(200).json({ message: "declined the friend request" });
     } catch (error) {
         console.log("Backend accept friend", error);
-        res.status(400).json({ message: "failed to decline frined request" });
+       return res.status(400).json({ message: "failed to decline frined request" });
     }
 
 }
 const getnotifications= async(req,res)=>{
     const userid = req.user._id;
     try {
-       
         console.log(userid)
         const unreadNotifications = await Notification.aggregate([
           {
@@ -331,10 +340,10 @@ const getnotifications= async(req,res)=>{
             }
           }
         ]);
-        res.status(200).json(unreadNotifications);
+       return res.status(200).json(unreadNotifications);
       } catch (error) {
         console.error('Error fetching unread notifications:', error);
-        res.status(500).json({ message: 'Error fetching unread notifications' });
+       return res.status(500).json({ message: 'Error fetching unread notifications' });
       }
 
 }

@@ -98,21 +98,24 @@ function Userprofile() {
       useEffect(() => {
         console.log(searchResults);
       }, [searchResults]);
-
-   const friendrequest = async ()=>{
-     try {
-      const response = await axios.post("http://localhost:8000/api/Addfriend",userid,friendid)
-      console.log(response)
-     } catch (error) {
-      console.log("front end friendd request error ",error)
-     }
-   }
+      const friendrequest = async () => {
+        console.log("frontend")
+        try {
+          const response = await axios.post('http://localhost:8000/api/Addfriend', {
+            userid,
+            friendid
+          });
+          console.log(response);
+        } catch (error) {
+          console.log('Front end friend request error:', error);
+        }
+      };
     
   return (
     <>
    <div>
       <div className=' px-9 w-full h-14 bg-black text-white rounded-2xl items-center flex justify-between'>
-        <div><Link to="/Home">Logo</Link></div>
+        <div><Link to={`/user/${loggedinuser}`}>Logo</Link></div>
         <div>
           <div className=' h-44 relative  top-20 flex flex-col'>
           <input
@@ -135,7 +138,7 @@ function Userprofile() {
           
         </div>
         <div className=' flex w-1/3 justify-evenly '>
-          <div> <Link to="/Home">Home</Link></div>
+          <div> <Link to={`/user/${loggedinuser}`}>Home</Link></div>
           {/* <div> <Link to="Messages">Message</Link></div>
           <div> <Link to="Friends">Friends</Link></div>
           <div><Link to="Profile">Profile</Link></div> */}
@@ -156,7 +159,7 @@ function Userprofile() {
           <div>
         {username !== loggedinuser ?(
           <div>
-            <button  onClick={() => friendrequest(userid, friendid)}  className='bg-blue-500 mt-3 text-white px-4 py-2 rounded'>Follow</button>
+            <button onClick={friendrequest}  className='bg-blue-500 mt-3 text-white px-4 py-2 rounded'>Follow</button>
           </div>
          ):(
           <div>

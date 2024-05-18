@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 import { useNavigate } from 'react-router-dom'
 
 function Loginform() {
+  const [username,setusername] = useState()
 const [loginname,setloginname] = useState()
 const[password,setpassword] = useState()
 const [profiledata,setprofiledata] = useState({})
@@ -18,9 +19,10 @@ try {
   console.log("sending")
   console.log(user)
   const response = await axios.post('http://localhost:8000/api/Login', user);
-  console.log(response.data);
-  console.log("read");
-  navigate("/Home")
+  console.log(response.data.loggedinuser.username)
+  setusername(response.data.loggedinuser.username)
+  console.log(username)
+  navigate(`/user/${response.data.loggedinuser.username}`);
 } catch (error) {
   console.log("Axios Error:", error);
       if (error.response) {
@@ -35,6 +37,7 @@ try {
   
 }
 }
+
   return (
     <div className=' flex justify-center   '>
        <div className=' text-black bg-red-400 pt-5 rounded-e-lg pb-5 px-5 flex flex-col justify-between   max-w-80   min-h-80'>
