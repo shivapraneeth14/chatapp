@@ -34,7 +34,6 @@ try {
       } else {
         console.log("Error Message:", error.message);
       }
-  
 }
 }
 

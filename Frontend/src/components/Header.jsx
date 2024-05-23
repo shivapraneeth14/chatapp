@@ -2,12 +2,17 @@ import axios from 'axios';
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Notification from './Notification';
+import { useSelector } from 'react-redux';
+
 
 function Header() {
   const [searchResults, setSearchResults] = useState([]);
   const [searchKey, setSearchKey] = useState('');
   const navigate = useNavigate();
   const [active, setActive] = useState(false);
+  const loggedinuser = useSelector(state => state.user.username);
+ 
+  
 
   const search = async () => {
     try {
@@ -20,9 +25,10 @@ function Header() {
     }
   };
 
-  const handleUsername = (username) => {
-    console.log("frontend username", username);
-    navigate(`/user/${username}/Userprofile`);
+  const handleUsername = (profilename) => {
+    console.log("loggedinuser",loggedinuser)
+    console.log("frontend username", profilename);
+    navigate(`userprofile/${profilename}`);
   };
 
   useEffect(() => {

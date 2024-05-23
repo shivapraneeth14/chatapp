@@ -4,7 +4,7 @@ import fileUploader from "../Utils/Cloudinary.js";
 import { syncIndexes } from "mongoose";
 import Friends from "../Models/Friends.model.js";
 import Notification from "../Models/Notifications.model.js";
-
+import mongoose from "mongoose";
 const saltroundes = 10;
 async function generatebothtoken(userid){
     try {
@@ -99,22 +99,23 @@ const Login = async (req, res) => {
         res.status(500).json({ message: "Internal server error" });
     }
 };
-const getuserprofile =async (req,res)=>{
-    console.log("getting user profile")
- try {
-      const user =  await User.findById(req.user._id)
-      if(!user){
-       res.status(404)
-       .json({message:"no user found"})
-      }
-      console.log("backend successful")
-     return res.status(200).json({user})
-      
- } catch (error) {
-    console.log(error)
-    return res.status(400).json({message:"internal sever error"})
- }
-}
+const getuserprofile = async (req, res) => {
+    const { username } =req.query;
+    console.log("backend", username);
+
+    try {
+        const user = await User.findOne({ username });
+        if (!user) {
+            return res.status(404).json({ message: "No user found" });
+        }
+        console.log("backend successful");
+        return res.status(200).json({ user });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: "Internal server error" });
+    }
+};
+
 const logout = async (req, res) => {
     console.log("logging out")
     try {
@@ -227,12 +228,12 @@ const changepassword = async (req, res) => {
   }
   const getotherprofile= async (req,res)=>{
     try {
-        const username = req.params.username
-        console.log("backend username ",username)
-        if(!username){
+        const{ profilename} = req.params
+        console.log("backend username ",profilename)
+        if(!profilename){
            return  res.status(400).json({mesaage:"cannot get the profile no username"})
         }
-        const user  = await User.findOne({username})
+        const user  = await User.findOne({username:profilename})
         console.log(user)
         if(!user){
            return res.status(400).json({message:"no user found on the username "})
@@ -265,21 +266,20 @@ const changepassword = async (req, res) => {
        if(!savedfriend){
         return res.status(400).json({message:"saved frined not found in backedn"})
        }
-       const requesid = savedfriend._id
-       console.log("savedfrined",requesid)
+       const frienddocid = savedfriend._id
 
-        const newNotification = new Notification({
-            userId: friendid, 
-            message: 'You have a new friend request'
-        });
-        const savedNotification = await newNotification.save(); 
-        if(!savedNotification){
-            return res.status(400).json({message:"saved notification not found in backedn"})
-           }
-        const notificationId = savedNotification._id;
-        console.log("notification id",notificationId)
+        // const newNotification = new Notification({
+        //     userId: friendid, 
+        //     message: 'You have a new friend request'
+        // });
+        // const savedNotification = await newNotification.save(); 
+        // if(!savedNotification){
+        //     return res.status(400).json({message:"saved notification not found in backedn"})
+        //    }
+        // const notificationId = savedNotification._id;
+        // console.log("notification id",notificationId)
 
-       return res.status(200).json({ message: 'Friend request sent', friend: newFriend._id, notification: newNotification._id  });
+       return res.status(200).json({ message: 'Friend request sent', frienddocid,savedfriend });
     } catch (error) {
         console.log("Backend add friend", error);
        return res.status(400).json({ message: "Unable to send friend request" });
@@ -288,17 +288,26 @@ const changepassword = async (req, res) => {
 
 const Acceptfriend = async (req, res) => {
     try {
-        const { requestid, notificationid } = req.body;
-
-        const friend = await Friends.findById(requestid);
+        const {frienddocid} = req.body;
+        console.log("requestid",frienddocid)
+        if(!frienddocid ){
+            return res.status(400).json({message:"no id s found"})
+        }
+        const friend = await Friends.findById(frienddocid);
+        if(!friend){
+            res.status(400).json({message:"no reuqest found"})
+        }
         friend.status = "accepted";
         await friend.save();
         console.log(friend)
 
-        const notification = await Notification.findById(notificationid);
-        notification.read = true;
-        await notification.save();
-        console.log(notification)
+        // const notification = await Notification.findById(notificationid);
+        // if(!notification){
+        //     res.status(400).json({message:"no notification  found found"})
+        // }
+        // notification.read = true;
+        // await notification.save();
+        // console.log(notification)
 
        return  res.status(200).json({ message: "New friend added" });
     } catch (error) {
@@ -306,48 +315,167 @@ const Acceptfriend = async (req, res) => {
        return res.status(400).json({ message: "Unable to accept friend request" });
     }
 };
-
-const Declinefriend = async(req,res)=>{
+const Declinefriend = async (req, res) => {
     try {
-        const { requestid, notificationid } = req.body;
+        const { frienddocid } = req.body;
+        console.log(frienddocid);
 
-        const friend = await Friends.findById(requestid);
-        friend.status = "declined";
-        await friend.save();
-        console.log(friend)
+        if (!frienddocid) {
+            return res.status(400).json({ message: "No ID found" });
+        }
 
-        const notification = await Notification.findById(notificationid);
-        notification.read = false;
-        await notification.save();
-        console.log(notification)
+        const objectId = new mongoose.Types.ObjectId(frienddocid);
+        const friend = await Friends.findById(objectId);
 
-       return res.status(200).json({ message: "declined the friend request" });
+        if (!friend) {
+            return res.status(400).json({ message: "No friend request found" });
+        }
+
+        const deletedFriend = await Friends.deleteOne({ _id: objectId });
+        console.log(deletedFriend);
+
+        if (deletedFriend.deletedCount === 0) {
+            return res.status(400).json({ message: "Failed to delete friend request" });
+        }
+        
+// const notification = await Notification.findById(notificationid);
+            // if(!notification){
+            //     return res.status(400).json({message:"no id s found"})
+            //  }
+           
+            //     notification.read = false;
+            //     await notification.save();
+            //     console.log(notification);
+        
+        
+            //     await Friends.deleteOne({ _id: requestid });
+            //     await Notification.deleteOne({ _id: notificationid });
+
+        return res.status(200).json({ message: "Declined the friend request" });
     } catch (error) {
-        console.log("Backend accept friend", error);
-       return res.status(400).json({ message: "failed to decline frined request" });
+        console.log("Backend decline friend error:", error);
+        return res.status(400).json({ message: "Failed to decline friend request" });
     }
+};
 
-}
 const getnotifications= async(req,res)=>{
-    const userid = req.user._id;
+    // console.log(req)
+    const {userid} = req.body
+    console.log('Received userid:', userid);
+    if(!userid){
+        return res.status(400).json({message:"no id s found"})
+    }
+    // const id = userid.user._id
+    // console.log("userid",id)
     try {
-        console.log(userid)
-        const unreadNotifications = await Notification.aggregate([
-          {
-            $match: {
-              userId: ObjectId(userid),
-              read: false
+        const friendrequests = await Friends.aggregate([
+            {
+                $match:{
+                    Followers: new mongoose.Types.ObjectId(userid),
+                    status:"pending"
+                }
+            },
+            {
+                $project:{
+                    Following:1,
+                    Followers:1,
+                    _id:1,
+                    status:1
+                }
             }
-          }
-        ]);
-       return res.status(200).json(unreadNotifications);
+
+        ])
+        console.log("frinedreques",friendrequests)
+
+
+        // const unreadNotifications = await Notification.aggregate([
+        //   {
+        //     $match: {
+        //       userId: new mongoose.Types.ObjectId(userid),
+        //       read: false
+        //     }
+        //   },
+        //   {
+        //     $lookup: {
+        //       from: "friends",
+        //       localField: "userId",
+        //       foreignField: "Followers",
+        //       as: "friend"
+        //     }
+        //   },
+        //   {
+        //     $project: {
+        //       _id: 1,
+        //       userId: 1,
+        //       message: 1,
+        //       read: 1,
+        //       createdAt: 1,
+        //       updatedAt: 1,
+        //       friend: {
+        //         Following:1,
+        //         Followers:1,
+        //         _id:1
+        //     }
+             
+        //     }
+        //   }
+        // ]);
+        console.log('Unread Notifications:',friendrequests );
+       return res.status(200).json(friendrequests);
       } catch (error) {
         console.error('Error fetching unread notifications:', error);
        return res.status(500).json({ message: 'Error fetching unread notifications' });
       }
 
 }
+const getuserid =async (req,res)=>{
+    console.log("getting user profile")
+ try {
+    const{username,followerid} = req.body
+  
+    
+      const user =  await User.findOne({
+        $or:[{username},{_id:followerid}]
+      })
+      console.log("backend user",user)
+      if(!user && !followerid){
+      return  res.status(404)
+       .json({message:"no user found"})
+      }
+      console.log("backend successful")
+     return res.status(200).json({user})
+ } catch (error) {
+    console.log(error)
+    return res.status(400).json({message:"internal sever error"})
+ }
+}
+const  getfriend = async(req,res)=>{
+    try {
+        const {userid,friendid} = req.body;
+        const friend = await User.aggregate([
+            {
+                $match:{
+                    _id:"userid"
+
+                }
+            },
+            {
+                $lookup:{
+                    from: "friends", 
+                    localField: "_id", 
+                    foreignField: "Following", 
+                    as: "friends"
+                }
+            }
+        ])
+
+
+    } catch (error) {
+        
+    }
+
+}
 
 export {register , Login,getuserprofile,logout,
     changepassword,uploadprofiepic,serachuser
-    ,getotherprofile,getcurrentuser,Addfriend,Acceptfriend,Declinefriend,getnotifications};
+    ,getotherprofile,getcurrentuser,Addfriend,Acceptfriend,Declinefriend,getnotifications,getuserid};

@@ -6,15 +6,19 @@ import Login from './components/Loginform'
 import Signup from './components/Signup'
 import Header from './components/Header'
 import { Outlet } from 'react-router-dom'
+import { Provider } from 'react-redux'
+import { store } from './components/Store'
 function App() {
   const [count, setCount] = useState(0)
 
   return (
     <>
+    <Provider store={store}>
      <div  >
      <Header/>
      <Outlet/>
      </div>
+     </Provider>
     
     </>
   )

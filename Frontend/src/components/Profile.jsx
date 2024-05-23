@@ -4,6 +4,7 @@ axios.defaults.withCredentials = true;
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import { Outlet } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 
 function Profile() {
   const [userdata, setUserData] = useState({});
@@ -11,20 +12,21 @@ function Profile() {
   const [profilepic,setprofilepic]= useState()
   const [profilepicurl,setprofilepicurl] = useState()
   const [loggedinuser,setloggedinuser] = useState()
+  const {username} = useParams()
     
 
-  function getAccessToken() {
-    console.log(document.cookie);
-    const cookies = document.cookie.split(';');
-    console.log(cookies);
-    for (const cookie of cookies) {
-      const [name, value] = cookie.trim().split('=');
-      if (name === 'accessToken') {
-        return decodeURIComponent(value);
-      }
-    }
-    return null;
-  }
+  // function getAccessToken() {
+  //   console.log(document.cookie);
+  //   const cookies = document.cookie.split(';');
+  //   console.log(cookies);
+  //   for (const cookie of cookies) {
+  //     const [name, value] = cookie.trim().split('=');
+  //     if (name === 'accessToken') {
+  //       return decodeURIComponent(value);
+  //     }
+  //   }
+  //   return null;
+  // }
   const logoutprofile = () => {
     console.log("before"); 
     const response = axios.get('http://localhost:8000/api/Logout')
@@ -39,31 +41,25 @@ function Profile() {
         });
 };
 
-    
-  useEffect(() => {
-    const fetchUserProfile = async () => {
-      try {
-        const accessToken = getAccessToken();
-        console.log('accesstoken:', accessToken);
-
-        if (!accessToken) {
-          console.error('Access token not found');
-          return;
-        }
-        const response = await axios.get('http://localhost:8000/api/Profile', {
-          headers: {
-            Authorization: `Bearer ${accessToken}`, 
-          },
-        });
+useEffect(()=>{
+  const fetchUserProfile = async ()=>{
+    console.log("username ",username)
+    try {
+      const response = await axios.get('http://localhost:8000/api/Profile', {
+        params: { username } 
+    });
         console.log(response.data.user);
         setUserData(response.data.user);
         setloggedinuser(response.data.user.username)
-      } catch (error) {
-        console.error('Error fetching user profile:', error);
-      }
-    };
-    fetchUserProfile();
-  }, []);
+      
+    } catch (error) {
+      console.error('Error fetching user profile:', error);
+    }
+  }
+  fetchUserProfile();
+},[username])
+
+  
   
   const uploadprofilepic = async () => {
     const formData = new FormData();

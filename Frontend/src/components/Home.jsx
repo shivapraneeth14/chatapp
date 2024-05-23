@@ -1,8 +1,14 @@
 import React, { useState } from 'react'
 import { useEffect } from 'react';
 import axios from 'axios';
+import { useDispatch } from 'react-redux';
+import { addUsername } from './UserSlice';
 function Home() {
 const [username,setusername] = useState()
+const dispatch = useDispatch();
+
+
+
   function getAccessToken() {
     console.log(document.cookie);
     const cookies = document.cookie.split(';');
@@ -32,6 +38,7 @@ const [username,setusername] = useState()
         });
         console.log(response.data.user);
         setusername(response.data.user.username)
+        dispatch(addUsername(response.data.user.username));
       } catch (error) {
         console.error('Error fetching user profile:', error);
       }
