@@ -10,6 +10,7 @@ import Messages from './components/Messages.jsx';
 import Friends from './components/Friends.jsx';
 import Newpassword from './components/Newpassword.jsx';
 import Userprofile from './components/Userprofile.jsx';
+import Chatbox from './components/Chatbox.jsx';
 import App from './App';
 import { Provider } from 'react-redux';
 import { store } from './components/Store';
@@ -50,6 +51,12 @@ const router = createBrowserRouter([
       {
         path: 'Messages',
         element: <Messages />,
+        children:[
+         {
+          path:":id",
+          element:<Chatbox/>
+         }
+        ]
       },
       {
         path: 'Friends',

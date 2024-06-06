@@ -426,8 +426,8 @@ const getnotifications= async(req,res)=>{
         console.error('Error fetching unread notifications:', error);
        return res.status(500).json({ message: 'Error fetching unread notifications' });
       }
-
 }
+
 const getuserid =async (req,res)=>{
     console.log("getting user profile")
  try {
@@ -473,9 +473,210 @@ const  getfriend = async(req,res)=>{
     } catch (error) {
         
     }
+}
+const checkfriend = async(req,res)=>{
+    const { userid, friendid } = req.body;
+    if(!userid || !friendid){
+        return res.status(400).json({message :"no id found"})
+    }
+    try {
+        
+        const followback = await Friends.findOne({ Followers: userid, Following: friendid, status: 'accepted' });
+        const following = await Friends.findOne({Followers:friendid,Following:userid,status:'accepted'})
+
+
+        if (followback && following) {
+            return res.status(200).json({ isFriend: "mutualfollowing" });
+        } else if (following) {
+            return res.status(200).json({ isFriend: "following" });
+        }else if(followback){
+            return res.status(200).json({isFriend: "followback"})
+        }
+         else {
+            return res.status(200).json({ isFriend: "none" });
+        }
+    } catch (error) {
+        console.log("Backend check friend status error:", error);
+        return  res.status(400).json({ message: "Failed to check friend status" });
+    }
 
 }
 
-export {register , Login,getuserprofile,logout,
-    changepassword,uploadprofiepic,serachuser
-    ,getotherprofile,getcurrentuser,Addfriend,Acceptfriend,Declinefriend,getnotifications,getuserid};
+const friends = async(req,res)=>{
+    const {userid} =  req.body
+    console.log(userid)
+    if(!userid){
+        return res.status(400).json({message:"no userid found"})
+    }
+    try {
+        const userfriends = await User.aggregate([
+            {
+              $match: {
+               _id: new mongoose.Types.ObjectId(userid),
+              }
+            },
+            {
+              $lookup: {
+                from: "friends",
+                localField: "_id",
+                foreignField: "Following",
+                as: "Following",
+                pipeline:[
+                  {
+                    $match:{
+                      status:"accepted"
+                    }
+                },
+                  {
+                    $lookup:{
+                      from: "users",
+                localField: "Followers",
+                foreignField: "_id",
+                as: "Followingdetails",
+                    }
+                  }
+                ]
+              }
+            },
+            {
+               $match: {
+               _id: new mongoose.Types.ObjectId(userid),
+              }
+          },
+            {
+              $lookup: {
+                from: "friends",
+                localField: "_id",
+                foreignField: "Followers",
+                as: "Followers",
+                pipeline:[
+                  {
+                    $match:{
+                      status:"accepted"
+                    }
+                  },
+                  {
+                    $lookup:{
+                       from: "users",
+                        localField: "Following",
+                        foreignField: "_id",
+                       as: "Followerdetails",
+                      
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+          )
+          if(!userfriends){
+            return res.status(400).json({message:"no userfrined found"})
+          }
+          return res.
+          status(200).
+          json({message:"user friend found",userfriends})
+        
+    } catch (error) {
+        console.log(error)
+        return res.status(400).json({message:"internal server error"})
+    }
+}
+const getuserbyid= async (req, res) => {
+    const { id } = req.body;
+
+    console.log("id", id);
+
+    if (!id) {
+        return res.status(400).json({ message: "id not found" });
+    }
+    try {
+        const user = await User.findById(id);
+
+        if (!user) {
+            return res.status(404).json({ message: "no user found" });
+        }
+        return res.status(200).json({ user });
+    } catch (error) {
+        console.log(error);
+
+        return res.status(500).json({ message: "unable to fetch the user" });
+    }
+};
+const deletemutualfollowing = async(req,res)=>{
+    try {
+        const {userid,friendid} = req.body
+
+        if (!userid || !friendid){
+            return res.status(400).json({message:"no ids found"})
+        }
+
+        const mefollwing = await Friends.findOne({
+            Following:userid,
+            Followers:friendid,
+            status:"accepted"
+        })
+        console.log("me following",mefollwing)
+        if(!mefollwing){
+            return res.status(400).json({message:"no document found in friends"})
+        }
+        const deletedone = await Friends.deleteOne({_id:mefollwing._id})
+        console.log("deletedone",deletedone)
+        if(!deletedone){
+         return res.status(400).json({message:"not dleted found"})
+        }
+        return res.status(200).json({message:"deleted mutula following"})
+    } catch (error) {
+        console.log(error)
+        return res.status(400).json({message:" internal server error in deleted mutual following",error})
+    }
+}
+const followback = async(req,res)=>{
+    try {
+        const {userid,friendid} = req.body
+        if (!userid || !friendid){
+            return res.status(400).json({message:"no ids found"})
+        }
+        const friend = new Friends({
+            Following:userid,
+            Followers:friendid,
+            status:"accepted"
+        })
+        console.log('friend',friend)
+
+        const savedfolowback =  await friend.save()
+
+        console.log("saved followback",savedfolowback)
+
+        return res.status(200).json({message:"followback succesful"})
+         
+
+    } catch (error) {
+        console.log(error)
+    }
+}
+const deletefollowing = async(req,res)=>{
+    try {
+        const {userid,friendid} = req.body
+        if (!userid || !friendid){
+            return res.status(400).json({message:"no ids found"})
+        }
+       const mefollwing  = await Friends.findOne({
+        Following:userid,
+        Followers:friendid,
+        status:"accepted"
+       })
+       if(!mefollwing){
+        return res.status(400).json({message:"no doucment found to unfollow"})
+       }
+       console.log("deletefollowing",mefollwing)
+       return res.status(400).json({message:"deleted following "})
+    } catch (error) {
+        console
+        .log(error)
+    }
+}
+
+export {register ,friends, Login,getuserprofile,logout,
+    changepassword,uploadprofiepic,serachuser,getuserbyid
+    ,deletemutualfollowing,followback,deletefollowing
+    ,getotherprofile,getcurrentuser,Addfriend,Acceptfriend,Declinefriend,getnotifications,getuserid,checkfriend};
