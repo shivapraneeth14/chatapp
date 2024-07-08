@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { changepassword, logout, register,uploadprofiepic,serachuser,getotherprofile,friends,deletefollowing
-  ,followback,checkfriend,getuserbyid,deletemutualfollowing  ,getcurrentuser,Addfriend,Acceptfriend,Declinefriend,getnotifications,getuserid} from "../Controllers/Usercontroller.js";
+  ,followback,checkfriend,getuserbyid,deletemutualfollowing,followerscount,followingcount  ,getcurrentuser,Addfriend,Acceptfriend,Declinefriend,getnotifications,getuserid} from "../Controllers/Usercontroller.js";
 import { Login,getuserprofile } from "../Controllers/Usercontroller.js";
 import verifyjwt from "../Middlewares/auth.middlesware.js";
 import upload from "../Middlewares/multer.middlesware.js";
@@ -27,6 +27,8 @@ router.route("/Userbyid").post(getuserbyid)
 router.route("/Deletemutualfollowing").post(deletemutualfollowing)
 router.route("/Followback").post(followback)
 router.route("/Deletefollowing").post(deletefollowing)
+router.route("/Followingcount").post(followingcount)
+router.route("/Followersocount").post(followerscount)
 
 
 

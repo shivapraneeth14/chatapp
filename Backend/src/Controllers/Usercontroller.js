@@ -675,8 +675,80 @@ const deletefollowing = async(req,res)=>{
         .log(error)
     }
 }
+const followingcount = async(req,res)=>{
+    const {profilename}= req.body
+    if(!profilename){
+        return res.status(400).json({message:"no name to count "})
+    }
+    console.log(profilename)
+    try {
+        const count = await User.aggregate([{
+            $match: {
+                username: profilename
+            }
+        },
+        {
+            $lookup: {
+                from: "friends",
+                localField: "_id",
+                foreignField: "Following",
+                as: "Following"
+            }
+        },
+        {
+            $addFields: {
+                FollowingCount: {
+                    $size: "$Following"
+                }
+            }
+        }])
+        console.log(count)
+        if(!count){
+            return res.status(400).json({message:"no count"})
+        }
+    return res.status(200).json({message:"following count ",count})
+    
+    } catch (error) {
+        console.log(error)
+    }
+}
+const followerscount = async(req,res)=>{
+    const {profilename}= req.body
+    if(!profilename){
+        return res.status(400).json({message:"no name to count "})
+    }
+    try {
+        const count = await User.aggregate([{
+            $match: {
+                username: profilename
+            }
+        },
+        {
+            $lookup: {
+                from: "friends",
+                localField: "_id",
+                foreignField: "Followers",
+                as: "Followers"
+            }
+        },
+        {
+            $addFields: {
+                FollowerCount: {
+                    $size: "$Followers"
+                }
+            }
+        }])
+        console.log(count)
+        if(!count){
+            return res.status(400).json({message:"no count"})
+        }
+    return res.status(200).json({message:"follower count ",count})
+    
+    } catch (error) {
+        console.log(error)
+    }
+}
 
 export {register ,friends, Login,getuserprofile,logout,
-    changepassword,uploadprofiepic,serachuser,getuserbyid
-    ,deletemutualfollowing,followback,deletefollowing
+    changepassword,uploadprofiepic,serachuser,getuserbyid,followerscount,followingcount,deletemutualfollowing,followback,deletefollowing
     ,getotherprofile,getcurrentuser,Addfriend,Acceptfriend,Declinefriend,getnotifications,getuserid,checkfriend};

@@ -4,9 +4,13 @@ import app from "./app.js";
 import {Server} from "socket.io"
 import {createServer} from "http"
 import http from 'http';  
-import { markAsUntransferable } from "worker_threads";
+import { AssemblyAI } from 'assemblyai'
 
 const server = http.createServer(app);
+const client = new AssemblyAI({
+  apiKey: process.env.ASSLEMBLY_API_KET
+});
+
 
 const io = new Server(server, {
   cors: {
@@ -38,24 +42,40 @@ io.on('connection', (socket) => {
   });
 
 
-  socket.on("message", (input,friendname)=>{
-    if(!friendname){
-      socket.broadcast.emit("receive",{text:input})
-      console.log(input)
-    }
-    else{
-      console.log("entered room")
-      console.log('friendname',friendname)
-      const user = activeusers.find(user=> user.username === friendname)
-      if(!user){
-       console.log("no user found")
+  socket.on("message", async (input, friendname, audiourl) => {
+    
+    
+    if (!friendname) {
+      socket.broadcast.emit("receive", { text: input }, audiourl);
+      console.log(input);
+      console.log(audiourl);
+    } else {
+      console.log("entered room");
+      console.log('friendname', friendname);
+      
+      const user = activeusers.find(user => user.username === friendname);
+      
+      if (!user) {
+        console.error("No user found for friendname:", friendname);
+        throw new Error(`User with username ${friendname} not found`);
       }
-   
-      roomid = user.roomid
-      socket.to(roomid).emit("receive",{text:input})
-      console.log("message sent",input)
+  
+      const room_id = user.roomid;
+      
+      if (audiourl) {
+        const transcript = await client.transcripts.transcribe({ audio_url: audiourl });
+        console.log("Transcript text:", transcript.text);
+        socket.to(room_id).emit("receive","", audiourl,transcript);
+        console.log("backend audiourl", audiourl);
+        
+      }
+      
+      if (input) {
+        socket.to(room_id).emit("receive",  input );
+        console.log("message sent", input);
+      }
     }
-  })
+  });
   socket.on('disconnect', () => {
     const disconnectedUser = activeusers.find(user => user.socketId === socket.id);
     console.log("disocnnect user",disconnectedUser)

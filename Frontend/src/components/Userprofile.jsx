@@ -14,6 +14,10 @@ function Userprofile() {
   const [followingstatus,setfollowing] = useState(false)
   const [deletemutualfollow,setdeletemutulafollow] = useState(false)
   const [addfollowback,setaddfollowback] = useState(false)
+  const [followerscount,setfollowersocunt] = useState(0)
+  const [followingcount,setfollowingcount] = useState(0)
+
+  
 
   useEffect(()=>{
     const fetchUserProfile = async ()=>{
@@ -162,11 +166,106 @@ const folback = async()=>{
     .log(error)
   }
 }
+useEffect(()=>{
+  const getfollowerscount = async()=>{
+   try {
+     const response = await axios.post("http://localhost:8000/api/Followersocount",{profilename})
+     console.log("followercount",response.data.count[0].
+     FollowerCount)
+     setfollowersocunt(response.data.count[0].
+      FollowerCount)
+   } catch (error) {
+    console.log(error)
+   }
+  }
+  getfollowerscount()
+},[profilename])
+
+useEffect(()=>{
+  const getfollowingcount = async ()=>{
+    try {
+      const response = await axios.post("http://localhost:8000/api/Followingcount",{profilename})
+      console.log("following coount",response.data.count[0].
+      FollowingCount)
+      setfollowingcount(response.data.count[0].
+        FollowingCount)
+    } catch (error) {
+      console.log(error)
+    }
+  }
+  getfollowingcount()
+},[profilename]
+)
   return (
     <>
-           
-    <div>
-      {Userdata && (<div className='w-full flex flex-col justify-center'>
+    {Userdata && (<div className=' flex flex-col px-3 py-3 justify-center items-center'>
+     <div className=' w-full flex justify-center  h-1/2 '>
+      <div className=' bg-white  w-96   flex h-auto px-3 py-3'>
+      <div className=' w-auto  h-auto'>
+          <div className=' w-32 h-32 overflow-hidden rounded-full bg-white'>
+          <img className="w-full h-full object-cover" src={Userdata.profilepicture} alt="" />
+          </div>
+        </div>
+            <div className='flex flex-col justify-center align-middle w-full  h-auto'>
+              <div className=' w-full flex text-xl px-6 py-3 text-left h-1/2 font-bold'>{Userdata.username}</div>
+              <div> {friendstatus === "mutualfollowing" ? ( 
+                          
+                          <div className=' flex justify-center'>{console.log("insisde status",friendstatus)}
+                      <button onClick={mutualfollow}  className={` border border-black text-black px-1 py-1 rounded ${status ? 'bg-white' : 'bg-blue-500'}`}>
+                        {deletemutualfollow ? 'Followback' : 'Following'}
+                      </button>
+                      <Link to={`/user/${username}/Messages`}>
+                      <button className=' border border-black text-black px-1 py-1 rounded bg-blue-500 ml-3 flex justify-evenly'>Message</button>
+                      </Link>
+                      </div>
+                    ) : friendstatus === "following" ? (
+                       <div className='  flex justify-center w-auto h-auto bg-red-800 '>
+                      <button onClick={changefollowingstatus} className={` border border-black text-black bg-blue-500 px-1 py-1 rounded`}>
+                        {followingstatus ? 'Follow' : 'Following'}
+                      </button>
+                      <Link to={`/user/${username}/Messages`}>
+                      <button className='border border-black text-black px-1 py-1 rounded bg-blue-500 ml-3 flex justify-evenly' >Message</button>
+                      </Link>
+                      </div>
+                    ) : friendstatus === "followback" ? (
+                      <button onClick={changeaddfollowback}  className={` border border-black text-black bg-blue-500 px-1 py-1 rounded`}>
+                        {addfollowback ? 'Following' : 'Followback'}
+                      </button>
+                    ):
+                    username === profilename ? (
+                      <button className='bg-blue-500 font-bold mt-3 border border-black text-black px-1 py-1 rounded'>Following</button>
+                    ) : (
+                      <button onClick={changestatus}  className={` border border-black text-black px-1 py-1 rounded ${status ? 'bg-white' : 'bg-blue-500'}`}>
+                        {status ? 'Sent' : 'Follow'}
+                      </button>
+                    )
+                    }</div>
+              <div className=' mt-3 w-full h-1/2'>
+                <div  className=' flex justify-evenly'>
+                 
+                  <div className=' flex'>
+                  <h5  className='  text-slate-800 mr-2 ' >{followingcount}</h5>
+              <h1 className=' text-slate-800'>Following</h1>
+                  </div>
+                  <div className=' flex'>
+                  <h5  className='  text-slate-800  mr-2' >{followerscount}</h5><h1 className=' text-slate-800 '>Followers</h1>
+              
+                  </div>
+                </div>
+              </div>
+            </div>
+      </div>
+  
+     </div>
+    
+     <div className=' w-full  h-1/2'></div>
+      </div> 
+
+    )}
+          
+    {/* <div>
+      {Userdata && (
+      <div className='w-full flex flex-col justify-center'>
             <div className='mt-8 w-full flex justify-center items-center'>
                 <div>
                     <div className='w-28 h-28 bg-gray-800 rounded-full overflow-hidden'>
@@ -213,22 +312,17 @@ const folback = async()=>{
                     </button>
                   )
                   }
-                            {/* {username !== profilename ? (
-                               <button onClick={changestatus} className='bg-blue-500 mt-3 text-white px-4 py-2 rounded'>
-                               {status ? 'Sent' : 'Follow'}
-                           </button>
-                            ) : (
-                                <button className='bg-blue-500 font-bold mt-3 text-white px-4 py-2 rounded'>Following</button>
-                            )} */}
+                            
                         </div>
                       
                     </div>
                     <h1 className='text-sm  '>{Userdata.email}</h1>
                 </div>
             </div>
-        </div>)}
+        </div>
+      )}
         
-    </div>
+    </div> */}
 </>
   )
 }
