@@ -5,6 +5,12 @@ import { syncIndexes } from "mongoose";
 import Friends from "../Models/Friends.model.js";
 import Notification from "../Models/Notifications.model.js";
 import mongoose from "mongoose";
+import { AssemblyAI } from 'assemblyai'
+const client = new AssemblyAI({
+    apiKey: process.env.ASSLEMBLY_API_KET
+  });
+  
+
 const saltroundes = 10;
 async function generatebothtoken(userid){
     try {
@@ -749,6 +755,34 @@ const followerscount = async(req,res)=>{
     }
 }
 
-export {register ,friends, Login,getuserprofile,logout,
+const audioupload = async(req,res)=>{
+    try {
+        // const {audioUrl} = req.body;
+        console.log('Received file:', req.file); 
+        if (!req.file) {
+            return res.status(400).send('No file uploaded');
+        }
+        console.log('audio file ', req.file)
+        const fileUrl = await fileUploader(req.file.path)
+
+
+        // const fileUrl = await fileUploader(req.file.path)
+        console.log("file url",fileUrl);
+
+    
+        // const fileUrl = `http://localhost:8000/uploads/${req.file.filename}`;
+        console.log("fileurl",fileUrl)
+        const transcript = await client.transcripts.transcribe({ audio_url: fileUrl.secure_url });
+        console.log("transcipt",transcript)
+        const transcriptText = transcript.text || 'No text in transcript';
+        res.json({ transcription: transcriptText, fileUrl });
+      } catch (error) {
+        console.error('Error during transcription:', error);
+        res.status(500).send('Error during transcription')
+      }
+
+}
+
+export {register ,friends, Login,getuserprofile,logout,audioupload,
     changepassword,uploadprofiepic,serachuser,getuserbyid,followerscount,followingcount,deletemutualfollowing,followback,deletefollowing
     ,getotherprofile,getcurrentuser,Addfriend,Acceptfriend,Declinefriend,getnotifications,getuserid,checkfriend};

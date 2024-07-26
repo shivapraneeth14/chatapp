@@ -3,8 +3,7 @@ import { useParams } from 'react-router-dom'
 import axios from 'axios'
 import { io } from 'socket.io-client';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faChainSlash, faMicrophone,faSquare } from '@fortawesome/free-solid-svg-icons'
-import { text } from '@fortawesome/fontawesome-svg-core';
+import { faChainSlash,faEye, faMicrophone,faSquare } from '@fortawesome/free-solid-svg-icons'
 
 
 function Chatbox() {
@@ -23,7 +22,8 @@ function Chatbox() {
   const [audiourl,setaudiurl] = useState()
   const [sentaudio,setsentaudio]= useState([])
   const [incomingaudio,setincomingaudio] = useState([])
-
+  const [audioblb,setaudioblb] = useState()
+  const [textbox,settextbox] = useState(false);
   const startrecording = async () => {
     
     console.log("started recording");
@@ -50,14 +50,14 @@ function Chatbox() {
       console.log("on stop audion shunks",audiochunks)
         console.log("stopped recording");
         const audioBlob = new Blob(audiochunks, { type: 'audio/wav' });
+        setaudioblb(audioBlob)
         console.log("audioBlob", audioBlob);
         const audioUrl = URL.createObjectURL(audioBlob);
-      URL.revokeObjectURL(audioUrl);
-      const cleanedurl  = audioUrl.replace("blob:","")
-      console.log("after audio blob",cleanedurl)
+     
+      // const cleanedurl  = audioUrl.replace("blob:","")
+      // console.log("after audio blob",cleanedurl)
       
-        setaudiurl(cleanedurl)
-        console.log("after audio blob",cleanedurl)
+        setaudiurl(audioUrl)
        
         
       };
@@ -165,7 +165,7 @@ useEffect(()=>{
   setfriendname(frineddata.username)
  },[frineddata])
 
- const sendMessage = () => {
+ const sendMessage = async() => {
   if (input !== "" || audiourl !== "") {
     const timestamp = Date.now()
     if(input){
@@ -173,9 +173,22 @@ useEffect(()=>{
       setsentmessage((prevMessages) => [...prevMessages, { text: input, type: 'sent',timestamp }]);
     }
     if(audiourl){
+      
+      const formData = new FormData();
+      formData.append('audio', audioblb, 'audio.wav');
+      const response = await axios.post("http://localhost:8000/api/Transcript", formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data'
+        }
+    });
+    const { transcription, fileUrl } = response.data;
       console.log("whiles ending audio urll  kkkk" ,audiourl);
-      socket.emit("message","", friendname, audiourl);
-      setsentaudio((audio) => [...audio, {audiourl,type:'sent',timestamp}]);
+      socket.emit("message","", friendname, audiourl,transcription);
+      
+
+
+      setsentaudio((audio) => [...audio, {audiourl,type:'sent',timestamp,
+        audiotext:transcription}]);
     }
     // if (input && audiourl) {
  
@@ -191,8 +204,9 @@ useEffect(()=>{
     console.log("sending audio url", audiourl);
     console.log("message sent");
     setinput("")
+    // URL.revokeObjectURL(audiourl);
     setaudiurl("")
-    
+    setaudioblb("")
   }
 };
 useEffect(()=>{
@@ -234,12 +248,15 @@ useEffect(()=>{
   console.log("recived messaged",messages)
 },[combinedMessages,messages,sentmessage])
 
+const texts =()=>{
+  settextbox((prev)=> !prev);
+}
 
 
 
   return (
     <>
-    <div className=' border border-slate-600 rounded-t-xl w-full bg-white py-2'>
+    <div className=' border border-slate-600 rounded-t-xl w-auto bg-white py-2'>
     <div className= '  rounded-xl px-4 py-3 h-20'>
     <div className=' flex'>
   <div className='  overflow-hidden w-16 h-16 rounded-full bg-white'>
@@ -255,7 +272,7 @@ useEffect(()=>{
  
   <div className=' px-2 py-2   flex flex-col'>
   <div className='w-full px-2 py-2 mb-2 rounded-xl  h-auto'>
-  {combinedMessages.map((msg, index,audio) => (
+  {combinedMessages.map((msg, index) => (
   <div 
     key={index} 
     className={`w-full flex ${msg.type  === 'incoming' ? 'justify-start' : 'justify-end'} mb-2`}
@@ -263,9 +280,23 @@ useEffect(()=>{
     <div  className={`max-w-fit rounded-xl h-auto px-2 py-2 ${msg.type === 'incoming' ? 'bg-blue-500 text-left' : 'border border-slate-500 bg-white text-right'}`}
     >
     {msg.text && <div>{msg.text}</div>}
-{msg.audiourl && (
+    {msg.audiourl && (
+     
+  <div className=' flex flex-col'>
+    {textbox ? (
   <div>
-    <audio controls src={msg.audiourl}></audio>
+    <div>
+    {msg.audiotext}</div>
+    <div onClick={texts}><FontAwesomeIcon icon={faEye}/></div>
+  </div>
+) : (
+  <div>
+    <div><audio controls src={msg.audiourl}></audio></div>
+    <div onClick={texts}><FontAwesomeIcon icon={faEye}/></div>
+  </div>
+)}
+
+    
   </div>
 )}
   

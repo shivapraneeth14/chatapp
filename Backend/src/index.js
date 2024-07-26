@@ -7,9 +7,9 @@ import http from 'http';
 import { AssemblyAI } from 'assemblyai'
 
 const server = http.createServer(app);
-const client = new AssemblyAI({
-  apiKey: process.env.ASSLEMBLY_API_KET
-});
+// const client = new AssemblyAI({
+//   apiKey: process.env.ASSLEMBLY_API_KET
+// });
 
 
 const io = new Server(server, {
@@ -42,7 +42,7 @@ io.on('connection', (socket) => {
   });
 
 
-  socket.on("message", async (input, friendname, audiourl) => {
+  socket.on("message", async (input, friendname, audiourl,transcriptText) => {
     
     
     if (!friendname) {
@@ -62,12 +62,24 @@ io.on('connection', (socket) => {
   
       const room_id = user.roomid;
       
+      
       if (audiourl) {
-        const transcript = await client.transcripts.transcribe({ audio_url: audiourl });
-        console.log("Transcript text:", transcript.text);
-        socket.to(room_id).emit("receive","", audiourl,transcript);
-        console.log("backend audiourl", audiourl);
+        // const cleanedUrl = audiourl.replace('blob:', '');
+        // console.log('Cleaned URL:', cleanedUrl);
         
+        socket.to(room_id).emit('receive', '', audiourl, transcriptText);
+
+        // try {
+        //   const transcript = await client.transcripts.transcribe({ audio_url: cleanedUrl });
+        //   const transcriptText = transcript.text;
+        //   if(transcriptText === null){
+        //     console.log("error in transcipted text",transcript.error)
+        //   }
+        //   console.log('Backend audio URL:', audiourl);
+        //   console.log('Transcript text:', transcriptText);
+        // } catch (error) {
+        //   console.error('Error during transcription:', error);
+        // }
       }
       
       if (input) {

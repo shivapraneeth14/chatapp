@@ -4,6 +4,9 @@ import { Link, useNavigate } from 'react-router-dom';
 import Notification from './Notification';
 import { useSelector } from 'react-redux';
 
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faHome,faMessage,faBell, faUserGroup , faUser } from '@fortawesome/free-solid-svg-icons'
+
 
 function Header() {
   const [searchResults, setSearchResults] = useState([]);
@@ -49,7 +52,7 @@ function Header() {
   };
 
   return (
-    <div className='px-4 md:px-9 w-full h-14 bg-black text-white  rounded-2xl flex items-center justify-between'>
+    <div className='px-4 md:px-9 min-w-80 h-14 bg-black text-white  rounded-2xl flex items-center justify-between'>
       <div className='text-lg md:text-xl'>
         <Link to="">Logo</Link>
       </div>
@@ -73,12 +76,12 @@ function Header() {
           ))}
         </div>
       </div>
-      <div className='max-sm:w-1/4 flex w-1/3 justify-evenly text-sm relative'>
-        <div><Link to="">Home</Link></div>
-        <div><Link to="Messages">Messages</Link></div>
-        <div><Link to="Friends">Friends</Link></div>
-        <div><Link to="Profile">Profile</Link></div>
-        <div className=' cursor-default' onClick={toggleNotification}>Notification</div>
+      <div className=' flex w-auto justify-evenly text-sm relative'>
+        <div className=' ml-1'><Link to=""><FontAwesomeIcon icon={faHome}/></Link></div>
+        <div className=' ml-7'><Link to="Messages"><FontAwesomeIcon icon={faMessage}/></Link></div>
+        <div className=' ml-7'><Link to="Friends"><FontAwesomeIcon icon={faUserGroup}/></Link></div>
+        <div className=' ml-7'><Link to="Profile"><FontAwesomeIcon icon={faUser}/></Link></div>
+        <div className=' ml-7 cursor-default' onClick={toggleNotification}><FontAwesomeIcon icon={faBell}/></div>
        
           {active && (
         <div className=' absolute top-8 right-0'>

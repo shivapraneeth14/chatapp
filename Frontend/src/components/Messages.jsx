@@ -54,7 +54,7 @@ function Messages() {
   return (
     <div>
      <div className=' flex justify-evenly px-4 py-4 '>
-      <div className='h-[calc(100vh-120px)] rounded-lg border border-slate-600  mb-4 w-80'>
+      <div className='h-[calc(100vh-120px)] rounded-lg border border-slate-600  mb-4 min-w-64'>
         <div className=' '>
         <div className=' relative  px-4 py-2 border border-b-slate-500 w-full h-20'>
           <div className=' w-full text-left  relative left-0 font-bold text-xl'>{username}</div>

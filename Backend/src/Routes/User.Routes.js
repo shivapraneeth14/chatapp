@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { changepassword, logout, register,uploadprofiepic,serachuser,getotherprofile,friends,deletefollowing
-  ,followback,checkfriend,getuserbyid,deletemutualfollowing,followerscount,followingcount  ,getcurrentuser,Addfriend,Acceptfriend,Declinefriend,getnotifications,getuserid} from "../Controllers/Usercontroller.js";
+  ,followback,checkfriend,getuserbyid,deletemutualfollowing,followerscount,followingcount,audioupload  ,getcurrentuser,Addfriend,Acceptfriend,Declinefriend,getnotifications,getuserid} from "../Controllers/Usercontroller.js";
 import { Login,getuserprofile } from "../Controllers/Usercontroller.js";
 import verifyjwt from "../Middlewares/auth.middlesware.js";
 import upload from "../Middlewares/multer.middlesware.js";
@@ -29,6 +29,7 @@ router.route("/Followback").post(followback)
 router.route("/Deletefollowing").post(deletefollowing)
 router.route("/Followingcount").post(followingcount)
 router.route("/Followersocount").post(followerscount)
+router.route("/Transcript").post(upload.single('audio'),audioupload)
 
 
 
