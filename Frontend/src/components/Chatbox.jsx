@@ -7,6 +7,8 @@ import { faChainSlash,faEye, faMicrophone,faSquare } from '@fortawesome/free-sol
 
 
 function Chatbox() {
+  const [sendedmessage,setsendedmessage] = useState([])
+  const [receivedmessage,setreceivedmessage] = useState([])
   const [combinedMessages,setCombinedMessages] = useState([])
   const [input ,setinput] = useState()
   const [sentmessage,setsentmessage] = useState([])
@@ -24,6 +26,57 @@ function Chatbox() {
   const [incomingaudio,setincomingaudio] = useState([])
   const [audioblb,setaudioblb] = useState()
   const [textbox,settextbox] = useState(false);
+  const [userid,setuserid] = useState()
+
+  useEffect(() => {
+    const getuserid = async () => {
+      if (!username) {
+        console.error("Username is not defined",);
+        return;
+      }
+      try {
+      console.log("fecthed username",username)
+
+        const response = await axios.post("http://localhost:8000/api/getuseridbyname", {
+         username: username 
+        });
+        console.log("User ID:", response.data.userid);
+        setuserid(response.data.userid)
+      } catch (error) {
+        console.error("Error fetching user ID:", error);
+      }
+    };
+  
+    if (username) {  
+      getuserid();
+    }
+  }, [username]);
+
+  useEffect(()=>{
+    const getmessages = async ()=>{
+      try {
+        const response = await axios.post("http://localhost:8000/api/getmessages", { userid:userid, friendid:id });
+        console.log("recived messages",response.data.receivedchat);
+        console.log("sended messages",response.data.sendedmessage);
+        const combined = [
+          ...response.data.receivedchat.map(message => ({ ...message, type: 'incoming' })),
+          ...response.data.sendedmessage.map(message => ({ ...message, type: 'sent' }))
+        ];
+
+        combined.sort((a, b) => new Date(a.time) - new Date(b.time));
+
+        setCombinedMessages(combined);
+
+      } catch (error) {
+        console.log("unable to fecth meessages",error)
+      }
+    };
+    getmessages()
+  },[id,userid])
+
+ 
+
+
   const startrecording = async () => {
     
     console.log("started recording");
@@ -143,8 +196,6 @@ useEffect(()=>{
   console.log("rommid",roomid)
  })
  
-
-
 useEffect(()=>{
   const getuserbyid = async ()=>{
     try {
@@ -169,7 +220,7 @@ useEffect(()=>{
   if (input !== "" || audiourl !== "") {
     const timestamp = Date.now()
     if(input){
-      socket.emit("message", input, friendname);
+      socket.emit("message", input, friendname,"","",userid,id);
       setsentmessage((prevMessages) => [...prevMessages, { text: input, type: 'sent',timestamp }]);
     }
     if(audiourl){
@@ -183,7 +234,7 @@ useEffect(()=>{
     });
     const { transcription, fileUrl } = response.data;
       console.log("whiles ending audio urll  kkkk" ,audiourl);
-      socket.emit("message","", friendname, audiourl,transcription);
+      socket.emit("message","", friendname, audiourl,transcription,userid,id);
       
 
 

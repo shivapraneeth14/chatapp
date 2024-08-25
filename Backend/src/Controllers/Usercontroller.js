@@ -6,6 +6,7 @@ import Friends from "../Models/Friends.model.js";
 import Notification from "../Models/Notifications.model.js";
 import mongoose from "mongoose";
 import { AssemblyAI } from 'assemblyai'
+import Chat from "../Models/Chat.model.js";
 const client = new AssemblyAI({
     apiKey: process.env.ASSLEMBLY_API_KET
   });
@@ -772,7 +773,9 @@ const audioupload = async(req,res)=>{
     
         // const fileUrl = `http://localhost:8000/uploads/${req.file.filename}`;
         console.log("fileurl",fileUrl)
-        const transcript = await client.transcripts.transcribe({ audio_url: fileUrl.secure_url });
+        const transcript = await client.transcripts.transcribe({ audio_url: fileUrl.secure_url,
+             language_code: 'hi'
+         });
         console.log("transcipt",transcript)
         const transcriptText = transcript.text || 'No text in transcript';
         res.json({ transcription: transcriptText, fileUrl });
@@ -782,7 +785,61 @@ const audioupload = async(req,res)=>{
       }
 
 }
+const getMessages = async (req, res) => {
+    try {
+        const { userid, friendid } = req.body;
+        console.log("getmessages",userid,friendid)
+        if (!userid ) {
+            return res.status(400).json({ message: "User ID is required" });
+        }
 
-export {register ,friends, Login,getuserprofile,logout,audioupload,
+        if ( !friendid) {
+            return res.status(400).json({ message: " Friend ID is required" });
+
+        }
+
+        const  receivedchat = await Chat.find({
+            sender: friendid, receiver: userid     
+        }).sort({ time: 1 });
+
+        const sendedmessage = await Chat.find({
+        sender:userid,receiver:friendid
+        })
+
+        res.status(200).json({
+            receivedchat: receivedchat,
+            sendedmessage: sendedmessage
+        });
+    } catch (error) {
+        console.error("Error fetching messages:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+};
+
+const usernametoid = async (req, res) => {
+    try {
+      const { username } = req.body;
+      console.log("Fetching ID of:   ;;", username);
+  
+      if (!username) {
+        return res.status(400).json({ message: "No username provided to search for messages" });
+      }
+  
+      
+      const user = await User.findOne({ username: username });
+  
+      if (!user) {
+        return res.status(400).json({ message: "No user found while searching for messages" });
+      }
+  
+      const userid = user._id;
+  
+      return res.status(200).json({ message: "User found", userid });
+    } catch (error) {
+      return res.status(500).json({ message: "Internal server error while fetching the messages" });
+    }
+  };
+  
+export {register ,friends, Login,getuserprofile,logout,audioupload,getMessages, usernametoid,
     changepassword,uploadprofiepic,serachuser,getuserbyid,followerscount,followingcount,deletemutualfollowing,followback,deletefollowing
     ,getotherprofile,getcurrentuser,Addfriend,Acceptfriend,Declinefriend,getnotifications,getuserid,checkfriend};

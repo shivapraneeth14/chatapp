@@ -5,13 +5,13 @@ import {Server} from "socket.io"
 import {createServer} from "http"
 import http from 'http';  
 import { AssemblyAI } from 'assemblyai'
+import Chat from "./Models/Chat.model.js";
+
 
 const server = http.createServer(app);
 // const client = new AssemblyAI({
 //   apiKey: process.env.ASSLEMBLY_API_KET
 // });
-
-
 const io = new Server(server, {
   cors: {
     origin: "http://localhost:5173", 
@@ -42,7 +42,7 @@ io.on('connection', (socket) => {
   });
 
 
-  socket.on("message", async (input, friendname, audiourl,transcriptText) => {
+  socket.on("message", async (input, friendname, audiourl,transcriptText,userid,id) => {
     
     
     if (!friendname) {
@@ -56,8 +56,21 @@ io.on('connection', (socket) => {
       const user = activeusers.find(user => user.username === friendname);
       
       if (!user) {
-        console.error("No user found for friendname:", friendname);
-        throw new Error(`User with username ${friendname} not found`);
+        const chat = new Chat({
+          sender:userid,
+          receiver:id,
+          text:input ,
+          audiourl:audiourl,
+          audiotext:transcriptText,
+        })
+        console.log("chat saved",chat)
+        if(!chat){
+          res.status(400).json({message:"chat not saved"})
+        }
+
+        await chat.save() 
+
+        return;
       }
   
       const room_id = user.roomid;
@@ -69,17 +82,7 @@ io.on('connection', (socket) => {
         
         socket.to(room_id).emit('receive', '', audiourl, transcriptText);
 
-        // try {
-        //   const transcript = await client.transcripts.transcribe({ audio_url: cleanedUrl });
-        //   const transcriptText = transcript.text;
-        //   if(transcriptText === null){
-        //     console.log("error in transcipted text",transcript.error)
-        //   }
-        //   console.log('Backend audio URL:', audiourl);
-        //   console.log('Transcript text:', transcriptText);
-        // } catch (error) {
-        //   console.error('Error during transcription:', error);
-        // }
+        
       }
       
       if (input) {
@@ -110,3 +113,18 @@ connect()
   .catch((err)=>{
     console.log("mogngo connection eroor",err)
   })
+
+
+
+
+  // try {
+        //   const transcript = await client.transcripts.transcribe({ audio_url: cleanedUrl });
+        //   const transcriptText = transcript.text;
+        //   if(transcriptText === null){
+        //     console.log("error in transcipted text",transcript.error)
+        //   }
+        //   console.log('Backend audio URL:', audiourl);
+        //   console.log('Transcript text:', transcriptText);
+        // } catch (error) {
+        //   console.error('Error during transcription:', error);
+        // }

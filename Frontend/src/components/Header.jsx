@@ -5,7 +5,7 @@ import Notification from './Notification';
 import { useSelector } from 'react-redux';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faHome,faMessage,faBell, faUserGroup , faUser } from '@fortawesome/free-solid-svg-icons'
+import { faHome,faMessage,faBell, faUserGroup , faUser, faShop } from '@fortawesome/free-solid-svg-icons'
 
 
 function Header() {
@@ -80,7 +80,9 @@ function Header() {
         <div className=' ml-1'><Link to=""><FontAwesomeIcon icon={faHome}/></Link></div>
         <div className=' ml-7'><Link to="Messages"><FontAwesomeIcon icon={faMessage}/></Link></div>
         <div className=' ml-7'><Link to="Friends"><FontAwesomeIcon icon={faUserGroup}/></Link></div>
+        <div className=' ml-7'><Link to="Friends"><FontAwesomeIcon icon={faShop}/></Link></div>
         <div className=' ml-7'><Link to="Profile"><FontAwesomeIcon icon={faUser}/></Link></div>
+
         <div className=' ml-7 cursor-default' onClick={toggleNotification}><FontAwesomeIcon icon={faBell}/></div>
        
           {active && (
