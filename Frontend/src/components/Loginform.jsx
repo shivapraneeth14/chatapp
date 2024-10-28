@@ -38,20 +38,20 @@ try {
 }
 
   return (
-    <div className=' flex justify-center   '>
-       <div className=' text-black bg-red-400 pt-5 rounded-e-lg pb-5 px-5 flex flex-col justify-between   max-w-80   min-h-80'>
+    <div className=' w-screen h-screen flex justify-center align-middle items-center bg-gradient-to-br from-blue-600 to-neutral-300   '>
+       <div className=' text-black shadow-slate-900 bg-white pt-5 rounded-e-lg pb-5 px-5 flex flex-col justify-between   max-w-80   min-h-80'>
        <h1 className=' mb-2 font-bold text-black'>Login</h1>
     <div className='  flex justify-between'>
     <input
     onChange={(e)=>setloginname(e.target.value)}
-     className=' rounded-lg pl-1'
+     className=' hover:border-blue-500  outline-blue-900  rounded-lg pl-1'
     placeholder='Username or email'
      type="text" />
     </div>
     <div className='  mt-3 flex justify-between'>
     <input 
     onChange={(e)=>setpassword(e.target.value)}
-    className=' rounded-lg pl-1'
+    className=' border-l-sky-800 rounded-lg pl-1'
     placeholder=' password'
      type="password" />
     </div>

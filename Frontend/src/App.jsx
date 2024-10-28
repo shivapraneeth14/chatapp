@@ -8,15 +8,17 @@ import Header from './components/Header'
 import { Outlet } from 'react-router-dom'
 import { Provider } from 'react-redux'
 import { store } from './components/Store'
+import Footer from './components/Footer'
 function App() {
   const [count, setCount] = useState(0)
 
   return (
     <>
     <Provider store={store}>
-     <div  >
+     <div className='w-full'  >
      <Header/>
      <Outlet/>
+     <Footer/>
      </div>
      </Provider>
     

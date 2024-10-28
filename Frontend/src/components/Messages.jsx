@@ -1,91 +1,74 @@
 import React from 'react'
-import { useParams } from 'react-router-dom'
-import Chatbox from './Chatbox'
-import { useState,useEffect } from 'react'
+import { useParams, Outlet, useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
 import axios from 'axios'
-import { Outlet } from 'react-router-dom'
-import { useNavigate } from 'react-router-dom'
+
 function Messages() {
-  const {username} = useParams()
-  const [userid,setuserid]= useState()
-  const [followingdetails,setfollowingdetails] = useState([])
+  const { username } = useParams()
+  const [userid, setuserid] = useState()
+  const [followingdetails, setfollowingdetails] = useState([])
   const navigate = useNavigate()
-  useEffect(()=>{
-    const getuserid = async()=>{
+
+  useEffect(() => {
+    const getuserid = async () => {
       try {
-         const response = await axios.post("http://localhost:8000/api/Getuserid",{username})
-         console.log(response.data.user._id)
-         setuserid(response.data.user._id)
+        const response = await axios.post("http://localhost:8000/api/Getuserid", { username })
+        setuserid(response.data.user._id)
+        console.log('user id',response.data.user._id);
+      } catch (error) {
+        console.log(error)
       }
-    catch (error) {
-      console.log(error)
-    }
     }
     getuserid()
-  },[username])
-  useEffect(()=>{
-    const getfriends = async()=>{
-      try {
-        const response = await axios.post("http://localhost:8000/api/friends",{userid})
-        console.log(response) 
-        const frienddetails = response.data.userfriends
-        console.log(frienddetails)
-        const followers = frienddetails.map((detail)=>detail.Followers)
-        console.log(followers)
-        const following = frienddetails.map((detail)=>detail.Following[0])
-        console.log("following",following)
-        const followingdetail = following.map((detai)=> detai.Followingdetails[0])
-        console.log("following details",followingdetail[0])
-        setfollowingdetails(followingdetail)
-        console.log(followingdetails)
+  }, [username])
 
+  useEffect(() => {
+    const getfriends = async () => {
+      try {
+        const response = await axios.post("http://localhost:8000/api/friends", { userid:userid })
+        console.log("sent userid",userid);
+        console.log("response for frined",response)
+        const frienddetails = response.data.userfriends
+        const following = frienddetails.map((detail) => detail.Following[0])
+        const followingdetail = following.map((detai) => detai.Followingdetails[0])
+        setfollowingdetails(followingdetail)
       } catch (error) {
-        console.log(error)  
+        console.log(error)
       }
     }
     getfriends()
-  },[userid])
-  useEffect(()=>{
-    console.log("followingdetails",followingdetails)
-  },[followingdetails])
-  const move =(id)=>{
-   navigate(`${id}`)
+  }, [userid])
+
+  const move = (id) => {
+    navigate(`${id}`)
   }
+
   return (
-    <div>
-     <div className=' flex justify-evenly px-4 py-4 '>
-      <div className='h-[calc(100vh-120px)] rounded-lg border border-slate-600  mb-4 min-w-64'>
-        <div className=' '>
-        <div className=' relative  px-4 py-2 border border-b-slate-500 w-full h-20'>
-          <div className=' w-full text-left  relative left-0 font-bold text-xl'>{username}</div>
-          <div className=' w-full text-center'>Messages</div>
+    <div className="h-screen flex justify-evenly items-start px-4 py-2 bg-gray-100">
+      {/* Sidebar */}
+      <div className="h-[calc(100vh-60px)] rounded-lg border border-slate-300 shadow-lg bg-white min-w-64 w-1/4">
+        <div>
+          <div className="relative px-4 py-3 border-b border-slate-200 w-full bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-t-lg">
+            <div className="text-left font-bold text-2xl">{username}</div>
+            <div className="text-center font-semibold">Messages</div>
+          </div>
+          <div className="overflow-y-auto max-h-[calc(100vh-120px)]">
+            {followingdetails && followingdetails.map((detail, index) => (
+              <div key={index} onClick={() => move(detail._id)} className="flex items-center py-2 px-3 hover:bg-gray-100 cursor-pointer border-b border-gray-200">
+                <div className="w-14 h-14 rounded-full overflow-hidden shadow-md">
+                  <img className="w-full h-full object-cover" src={detail.profilepicture} alt="" />
+                </div>
+                <div className="w-64 px-4 text-gray-700 font-semibold text-lg">{detail.username}</div>
+              </div>
+            ))}
+          </div>
         </div>
-        <div className=''>
-        <div className=' border px-3   w-full h-16'>
-          
-        {followingdetails && followingdetails.map((detail, index) => (
-           <div onClick={()=>move(detail._id)} key={index} className=' flex justify-evenly '>
-                  <div key={index} className='w-14 h-14 bg-white overflow-hidden rounded-full'>
-                    <img src={detail.profilepicture} alt="" />
-                  </div>
-                     <div className='w-64 px-3 text-left '>{detail.username}</div>
-            </div>
-             ))}
-             </div>
-        </div>
-        </div>
-       
       </div>
-      <div className=' h-[calc(100vh-120px)] px-2  rounded-lg  bg-red-500 w-2/3'>
-        
-       <Outlet/>
-       
-        
-        {/* <div className=' flex  justify-center items-center'>
-          <div className=' w-56 h-56 bg-yellow-500'>hello</div>
-        </div> */}
+
+      {/* Chat area */}
+      <div className="min-h-[calc(100vh-60px)] px-2 rounded-lg w-full bg-white shadow-lg">
+        <Outlet />
       </div>
-     </div>
     </div>
   )
 }

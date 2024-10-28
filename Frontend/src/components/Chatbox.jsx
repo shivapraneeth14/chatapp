@@ -1,9 +1,9 @@
-import React, { useEffect, useState,useRef } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import axios from 'axios'
 import { io } from 'socket.io-client';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faChainSlash,faEye, faMicrophone,faSquare } from '@fortawesome/free-solid-svg-icons'
+import { faEye, faMicrophone,faSquare } from '@fortawesome/free-solid-svg-icons'
 
 
 function Chatbox() {
@@ -237,7 +237,6 @@ useEffect(()=>{
       socket.emit("message","", friendname, audiourl,transcription,userid,id);
       
 
-
       setsentaudio((audio) => [...audio, {audiourl,type:'sent',timestamp,
         audiotext:transcription}]);
     }
@@ -307,9 +306,9 @@ const texts =()=>{
 
   return (
     <>
-    <div className=' border border-slate-600 rounded-t-xl w-auto bg-white py-2'>
+    <div className=' w-full h-auto  border border-slate-600 rounded-t-xl  bg-white py-2'>
     <div className= '  rounded-xl px-4 py-3 h-20'>
-    <div className=' flex'>
+    <div className=' flex '>
   <div className='  overflow-hidden w-16 h-16 rounded-full bg-white'>
     <img src={frineddata.profilepicture} alt="" />
   </div>
@@ -318,7 +317,7 @@ const texts =()=>{
   </div>
     </div>
 
-   <div className='relative rounded-lg overflow-y-scroll  h-[calc(100vh-270px)] border border-slate-600  bg-white px-1 py-1'>
+   <div className='  relative rounded-lg overflow-y-scroll  h-[calc(100vh-270px)] border border-slate-600  bg-white px-1 py-1'>
 
  
   <div className=' px-2 py-2   flex flex-col'>
@@ -330,19 +329,19 @@ const texts =()=>{
   >
     <div  className={`max-w-fit rounded-xl h-auto px-2 py-2 ${msg.type === 'incoming' ? 'bg-blue-500 text-left' : 'border border-slate-500 bg-white text-right'}`}
     >
-    {msg.text && <div>{msg.text}</div>}
+    {msg.text && <div className=' min-w-fit'>{msg.text}</div>}
     {msg.audiourl && (
      
   <div className=' flex flex-col'>
     {textbox ? (
   <div>
-    <div>
+    <div className=' w-auto h-auto'>
     {msg.audiotext}</div>
     <div onClick={texts}><FontAwesomeIcon icon={faEye}/></div>
   </div>
 ) : (
   <div>
-    <div><audio controls src={msg.audiourl}></audio></div>
+    <div className=' w-auto h-auto '><audio controls src={msg.audiourl}></audio></div>
     <div onClick={texts}><FontAwesomeIcon icon={faEye}/></div>
   </div>
 )}

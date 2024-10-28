@@ -22,7 +22,11 @@ const userSchema = new mongoose.Schema({
     } ,
     profilepicture:{
         type:String,
-    }
+    },
+    store:{
+        type:Boolean,
+        default:false
+    },
 },{timestamps:true})
 userSchema.methods.isPasswordCorrect = async function(password) {
     console.log("password verification completed")

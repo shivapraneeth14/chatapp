@@ -2,6 +2,7 @@ import React from 'react'
 import {  useParams } from 'react-router-dom';
 import { useEffect,useState } from 'react';
 import axios from 'axios'
+
 import { Link } from 'react-router-dom';
 function Userprofile() {
   const {username,profilename} = useParams()
@@ -16,6 +17,7 @@ function Userprofile() {
   const [addfollowback,setaddfollowback] = useState(false)
   const [followerscount,setfollowersocunt] = useState(0)
   const [followingcount,setfollowingcount] = useState(0)
+  const [hastore,sethasstore] = useState(false)
 
   
 
@@ -29,6 +31,7 @@ function Userprofile() {
           console.log("logged in user data",response.data.user)
           setuserid(response.data.user._id);
           console.log(userid)
+         
 
       } catch (error) {
         console.error('Error fetching user profile:', error);
@@ -52,6 +55,7 @@ console.log("function in user ", username);
             console.log("profile data",response.data.user)
             setUserData(response.data.user);
             setFriendid(response.data.user._id);
+            sethasstore(response.data.user.store);
         } catch (error) {
             console.error("Error fetching user details:", error);
         }
@@ -253,6 +257,18 @@ useEffect(()=>{
                   </div>
                 </div>
               </div>
+              {hastore && (
+                <div>
+                <Link 
+                to={`/user/${username}/Store`}
+                state={{ Storebelongto:friendid }}
+                className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded shadow-lg transition-all duration-300 ease-in-out'>
+                Store</Link>
+                {/* <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded shadow-lg transition-all duration-300 ease-in-out">
+                  Store
+                </button> */}
+              </div>
+              )}
             </div>
       </div>
   
@@ -328,4 +344,3 @@ useEffect(()=>{
 }
 
 export default Userprofile
-

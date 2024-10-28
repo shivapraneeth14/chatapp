@@ -1,112 +1,109 @@
-import React, { useEffect, useState } from 'react'
-import axios from 'axios'
-import { useParams } from 'react-router-dom'
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import { useParams } from 'react-router-dom';
 
 function Notification() {
-  const [userid,setuserid] = useState()
-  const {username} = useParams()
-  const [followerid,setfollowerid] = useState()
-  const [followerdata,setfollowerdata] = useState()
-  const [requestid,setrequestid] = useState()
-  const [notificationid,setnotificationid] = useState()
-  const [frienddocid,setfrienddocid] = useState()
- 
-  useEffect(()=>{
-    const getuserid = async()=>{
-      try {
-         const response = await axios.post("http://localhost:8000/api/Getuserid",{username})
-         console.log(response.data.user._id)
-         setuserid(response.data.user._id)
-      }
-    catch (error) {
-      console.log(error)
-    }
-    }
-    getuserid()
-  },[username])
+  const [userid, setuserid] = useState();
+  const { username } = useParams();
+  const [followerid, setfollowerid] = useState();
+  const [followerdata, setfollowerdata] = useState();
+  const [frienddocid, setfrienddocid] = useState();
 
-
-    useEffect(()=>{
-    const notify= async()=>{
+  useEffect(() => {
+    const getuserid = async () => {
       try {
-        const response = await axios.post("http://localhost:8000/api/Notifications",{userid})
-        console.log("front end response",response.data)
-        const data = response.data 
-        const id = data.map((data)=>data._id)
-        const followerid = data.map((data)=>data.Following)
-        console.log("id",id[0])
-        console.log("fol id",followerid)
-        setfrienddocid(id[0])
-        setfollowerid(followerid[0])
-        if (response.data.length === 0) {
-          console.log('No unread notifications found.');
-        } else {
-          console.log('Unread Notifications:', response.data);
-        }
+        const response = await axios.post('http://localhost:8000/api/Getuserid', { username });
+        console.log(response.data.user._id);
+        setuserid(response.data.user._id);
       } catch (error) {
-        console.log(error)
+        console.log(error);
       }
-    }
-    notify()
-    },[userid,followerid,requestid])
+    };
+    getuserid();
+  }, [username]);
 
-    useEffect(()=>{
-      const getfollowerid = async()=>{
-        
-        try {
-           const response = await axios.post("http://localhost:8000/api/Getuserid",{followerid})
-           console.log("follower id data",response.data.user)
-           setfollowerdata(response.data.user)
-        }
-      catch (error) {
-        console.log(error)
-      }
-      }
-      getfollowerid()
-    },[followerid])
-
-    const acceptrequest = async()=>{
-      console.log("acceptoing request",notificationid)
+  useEffect(() => {
+    const notify = async () => {
       try {
-        const response = await axios.post("http://localhost:8000/api/Acceptfriend",{frienddocid})
-        console.log(response)
-        console.log("accepted request")
-       
+        const response = await axios.post('http://localhost:8000/api/Notifications', { userid });
+        console.log('front end response', response.data);
+        const data = response.data;
+        const id = data.map((data) => data._id);
+        const followerid = data.map((data) => data.Following);
+        console.log('id', id[0]);
+        console.log('follower id', followerid);
+        setfrienddocid(id[0]);
+        setfollowerid(followerid[0]);
       } catch (error) {
-        console.log(error)
+        console.log(error);
       }
-    }
+    };
+    notify();
+  }, [userid]);
 
-    const deleterequest = async ()=>{
-      console.log("deleting request")
+  useEffect(() => {
+    const getfollowerid = async () => {
       try {
-        const response = await axios.post("http://localhost:8000/api/Declinefriend",{frienddocid})
-        console.log(response)
-        console.log("request deleted")
+        const response = await axios.post('http://localhost:8000/api/Getuserid', { followerid });
+        console.log('follower id data', response.data.user);
+        setfollowerdata(response.data.user);
       } catch (error) {
-        console.log(error)
+        console.log(error);
       }
+    };
+    getfollowerid();
+  }, [followerid]);
+
+  const acceptrequest = async () => {
+    console.log('accepting request', frienddocid);
+    try {
+      const response = await axios.post('http://localhost:8000/api/Acceptfriend', { frienddocid });
+      console.log(response);
+      console.log('accepted request');
+    } catch (error) {
+      console.log(error);
     }
+  };
+
+  const deleterequest = async () => {
+    console.log('deleting request');
+    try {
+      const response = await axios.post('http://localhost:8000/api/Declinefriend', { frienddocid });
+      console.log(response);
+      console.log('request deleted');
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
-    <div className=''>
-      <div className=' border border-gray-700  px-2 py-2  w-64 rounded-xl  bg-white  min-h-16'>
-      {followerdata ? (
-          <div>
-            <div className='text-black'>
-              you have a friend request from <div className='font-bold'>{followerdata.username}</div>
-            </div>
-            <div className='flex justify-evenly'>
-              <button onClick={acceptrequest} className='bg-blue-800 px-1 rounded-xl py-1 text-black'>Accept</button>
-              <button onClick={deleterequest} className='border border-gray-700 bg-white px-1 rounded-xl py-1 text-black'>Delete</button>
+    <div className='flex justify-center mt-10'>
+      <div className='border border-gray-300 px-6 py-4 w-72 rounded-lg bg-white shadow-lg'>
+        {followerdata ? (
+          <div className='text-center'>
+            <p className='text-lg font-semibold text-gray-800'>
+              You have a friend request from{' '}
+              <span className='text-blue-600 font-bold'>{followerdata.username}</span>
+            </p>
+            <div className='mt-4 flex justify-evenly'>
+              <button
+                onClick={acceptrequest}
+                className='bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-all duration-300'>
+                Accept
+              </button>
+              <button
+                onClick={deleterequest}
+                className='border border-gray-400 text-gray-600 px-4 py-2 rounded-lg hover:bg-gray-100 transition-all duration-300'>
+                Delete
+              </button>
             </div>
           </div>
         ) : (
-          <div className=' text-black' >No notification</div>
+          <p className='text-center text-gray-600'>No notifications at the moment.</p>
         )}
       </div>
     </div>
-  )
+  );
 }
 
-export default Notification
+export default Notification;

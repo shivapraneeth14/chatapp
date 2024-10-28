@@ -7,10 +7,20 @@ import Notification from "../Models/Notifications.model.js";
 import mongoose from "mongoose";
 import { AssemblyAI } from 'assemblyai'
 import Chat from "../Models/Chat.model.js";
+import transporter from "../Utils/Nodemailer.js";
+import sgMail from '@sendgrid/mail';
+import Store from "../Models/Store.model.js";
+import Product from "../Models/Product.model.js";
+import { Cashfree } from "cashfree-pg"; 
+import axios from "axios"
+const CASHFREE_BASE_URL = 'https://sandbox.cashfree.com/pg';
+sgMail.setApiKey(process.env.SENDGRID_API_KEY)
 const client = new AssemblyAI({
     apiKey: process.env.ASSLEMBLY_API_KET
   });
-  
+  Cashfree.XClientId = process.env.APP_ID
+  Cashfree.XClientSecret = process.env.SECRET_KEY
+  Cashfree.XEnvironment = Cashfree.Environment.SANDBOX;
 
 const saltroundes = 10;
 async function generatebothtoken(userid){
@@ -275,16 +285,7 @@ const changepassword = async (req, res) => {
        }
        const frienddocid = savedfriend._id
 
-        // const newNotification = new Notification({
-        //     userId: friendid, 
-        //     message: 'You have a new friend request'
-        // });
-        // const savedNotification = await newNotification.save(); 
-        // if(!savedNotification){
-        //     return res.status(400).json({message:"saved notification not found in backedn"})
-        //    }
-        // const notificationId = savedNotification._id;
-        // console.log("notification id",notificationId)
+        
 
        return res.status(200).json({ message: 'Friend request sent', frienddocid,savedfriend });
     } catch (error) {
@@ -308,13 +309,7 @@ const Acceptfriend = async (req, res) => {
         await friend.save();
         console.log(friend)
 
-        // const notification = await Notification.findById(notificationid);
-        // if(!notification){
-        //     res.status(400).json({message:"no notification  found found"})
-        // }
-        // notification.read = true;
-        // await notification.save();
-        // console.log(notification)
+        
 
        return  res.status(200).json({ message: "New friend added" });
     } catch (error) {
@@ -511,7 +506,7 @@ const checkfriend = async(req,res)=>{
 
 const friends = async(req,res)=>{
     const {userid} =  req.body
-    console.log(userid)
+    console.log("user id for friends",userid);
     if(!userid){
         return res.status(400).json({message:"no userid found"})
     }
@@ -774,7 +769,7 @@ const audioupload = async(req,res)=>{
         // const fileUrl = `http://localhost:8000/uploads/${req.file.filename}`;
         console.log("fileurl",fileUrl)
         const transcript = await client.transcripts.transcribe({ audio_url: fileUrl.secure_url,
-             language_code: 'hi'
+            
          });
         console.log("transcipt",transcript)
         const transcriptText = transcript.text || 'No text in transcript';
@@ -825,7 +820,6 @@ const usernametoid = async (req, res) => {
         return res.status(400).json({ message: "No username provided to search for messages" });
       }
   
-      
       const user = await User.findOne({ username: username });
   
       if (!user) {
@@ -839,7 +833,384 @@ const usernametoid = async (req, res) => {
       return res.status(500).json({ message: "Internal server error while fetching the messages" });
     }
   };
+
+  const feedback = async (req, res) => {
+
+    const { from, to, subject, text } = req.body;
+
+    const mailOptions = {
+        from,
+        to,
+        subject,
+        text
+    };
+    console.log(mailOptions)
+
+    try {
+
+        if (! mailOptions) {
+            return res.status(400).json({ message: "No feedback message" });
+        }
+
+        const info = await transporter.sendMail(mailOptions);
+        console.log('Email sent: ' + info.response);
+        if (! info) {
+            return res.status(400).json({ message: "No feedback sent" });
+        }
+
+        return res.status(200).json({ message: "Feedback  sent" });
+    } catch (error) {
+        console.error("Error in feedback function: ", error);
+        return res.status(500).json({ message: "Internal server error", error });
+    }
+};
+const getuseremail=async(req,res)=>{
+    const {username} = req.body;
+    try {
+        if(!username){
+            return res.status(400).json({message:"no username for email"});
+        }
+        const user = await User.findOne({username:username});
+        if(!user){
+            return res.status(400).json({message:"no user found to get email"})
+        }
+        const email = user.email
+        if(!email){
+           return res.status(400).json({message:"no email found for the user"})
+        }
+        res.status(200).json({message:"email found",email})
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({message:"INternal server error ",error})
+    }
+}
+const createownstore = async (req, res) => {
+    console.log("creating");
+    const { owner, storeName, email, description } = req.body;
+    console.log("owner", owner);
+
+
+    try {
+        
+    const user = await User.findOne({ username: owner });
+    if (!user) {
+        return res.status(400).json({ message: "No user found while creating the store" });
+    }
+    console.log("username", user);
+
+    const userid = user._id;
+    console.log("userid", userid);
+
+    // Create a new store instance
+    const store = new Store({
+        owner: owner,  // Use user ID instead of username
+        storeName,
+        email,
+        description,
+        ownerid: userid
+    });
+    console.log("store", store);
+    const savedStore = await store.save();
+    console.log("store saved", savedStore);
+     
+       
+
+        
+        user.store = true;
+        await user.save();
+
+     
+        if (!savedStore) {
+            return res.status(400).json({ message: "No store created" });
+        }
+
+        return res.status(200).json({ message: "Store created successfully" });
+    } catch (error) {
+        console.error("Error while creating store:", error);
+        return res.status(500).json({ message: "Internal server error" });
+    }
+};
+const additem = async (req, res) => {
+
+    try {
+            const { username, name, description, price, stock, category} = req.body;
+            const image = req.file;
+          
+            console.log(username)
+            console.log("imagefile",image)
+            
+            if(!username){
+                return res.status(400).json({message:"no user name"})
+            }
+            console.log("at image processing")
+            const Url = await fileUploader(image.path)
+            const imageUrl = Url.secure_url;
+            console.log(imageUrl)
+     
+      
+            const user = await User.findOne({ username: username });
+            console.log("user",user)
+            if (!user) {
+                return res.status(404).json({ message: "User not found" });
+            }
+    
+            const userid = user._id;
+            console.log("user",userid)
+            if (!userid) {
+                return res.status(404).json({ message: "Store not found" });
+            }
+    
+            const store = await Store.findOne({ ownerid: userid });
+            if (!store) {
+                return res.status(404).json({ message: "Store not found" });
+            }
+            console.log("user",store);
+            const storeid = store._id;
+            if (!storeid) {
+                return res.status(404).json({ message: "Store not found" });
+            }
+            console.log("store",storeid)
+
+            const product = new Product({
+                name: name,
+                description: description,
+                price: price,
+                stock: stock,
+                imageUrl: imageUrl,
+                category: category,
+                storeId: storeid,
+                ownerid: userid
+            });
+            console.log("product",product)
+            await product.save().catch((err) => {
+                console.error("Error saving product:", err);
+                return res.status(400).json({ message: "Product save failed", error: err.message });
+            });
+            console.log("saved")
+    } catch (error) {
+        
+        return res.status(400).json({ message:"INNternal server error" });
+    }
+
   
-export {register ,friends, Login,getuserprofile,logout,audioupload,getMessages, usernametoid,
+    
+};
+
+const deleteitem = async (req, res) => {
+    const { username, productid } = req.body;
+
+    try {
+        const user = await User.findOne({ username: username });
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+        console.log("user",user)
+
+        const userid = user._id;
+        console.log("user",userid)
+        const store = await Store.findOne({ ownerid: userid });
+        if (!store) {
+            return res.status(404).json({ message: "Store not found" });
+        }
+
+        const storeid = store._id;
+        console.log("user",storeid)
+        const product = await Product.findOneAndDelete({ _id: productid, storeId: storeid });
+        console.log("prodcut",product)
+        if (!product) {
+            return res.status(404).json({ message: "Product not found or does not belong to the store" });
+        }
+
+        return res.status(200).json({ message: "Product deleted successfully" });
+
+    } catch (error) {
+        console.error(error); 
+        return res.status(500).json({ message: "Internal server error" });
+    }
+};
+const mystoreitem = async (req, res) => {
+    console.log("processing")
+    console.log("Request body:", req.body);
+    const { username } = req.body;
+        console.log("username");
+    try {
+        
+        const user = await User.findOne({ username: username });
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+        console.log("user",user)
+        const userid = user._id;
+        console.log("user",userid)
+        if (user.store) {
+            const storeArray = await Store.find({ owner: username, ownerid:userid });
+            if (!storeArray) {
+                return res.status(404).json({ message: "Store not found" });
+            }
+            const store = storeArray[0];  
+            const storeid = store._id;
+            console.log("storeid",storeid)
+            const products = await Product.find({ storeId: storeid,ownerid:userid });
+            if (!products || products.length === 0) {
+                return res.status(404).json({ message: "No products found for this store" });
+            }
+            console.log("products",products)
+            return res.status(200).json({ products });
+        } else {
+            return res.status(404).json({ message: "User does not own a store" });
+        }
+    } catch (error) {
+        console.error(error); 
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+};
+const useritems = async (req, res) => {
+    try {
+        const { userid } = req.body;
+        const user = await User.findOne({ _id: userid });
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        const username = user.username;
+
+        // Check if the user has a store
+        if (user.store) {
+            // Find the store owned by the user
+            const store = await Store.findOne({ owner: username });
+            if (!store) {
+                return res.status(404).json({ message: "Store not found" });
+            }
+
+            const storeid = store._id;
+
+            // Find products owned by the user in their store
+            const products = await Product.find({ ownerid: userid, storeId: storeid });
+
+            if (products.length === 0) {
+                return res.status(404).json({ message: "No products found for this user in the store" });
+            }
+
+            // Return the products found
+            return res.status(200).json({ products });
+        } else {
+            return res.status(404).json({ message: "User does not own a store" });
+        }
+    } catch (error) {
+        console.error(error); // Log the error for debugging
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+};
+
+const storeitems = async(req,res)=>{
+    try {
+        console.log("fetching products")
+        const products = await Product.find()
+        if(!products){
+            return res.status(400).json({message:"NO products found"})
+        }
+        return res.status(200).json({message:"products found",products})
+    } catch (error) {
+        return res.status(500).json({message:"internal severr error"})
+    }
+}
+// const createOrder = async (req, res) => {
+//     const { orderDetails } = req.body;
+//     const { customerName, customerEmail, customerPhone, amount, productId } = orderDetails;
+//     console.log(orderDetails);
+//     console.log("backend")
+
+//     const orderPayload = {
+//         order_amount: amount,
+//         order_currency: 'INR',
+//         customer_details: {
+//             customer_id: `user_${customerPhone}`, // Unique ID based on phone
+//             customer_name: customerName,
+//             customer_email: customerEmail,
+//             customer_phone: customerPhone,
+//         },
+//         order_meta: {
+//             return_url: `http://localhost:3000/order-confirmation?order_id={order_id}`, // Your frontend return URL
+//         },
+//         order_note: `Purchase of Product ID: ${productId}`,
+//     };
+
+//     try {
+//         const response = await axios.post(
+//             `${CASHFREE_BASE_URL}/orders`,
+//             orderPayload,
+//             {
+//                 headers: {
+//                     'x-api-version': '2023-08-01',
+//                     'Content-Type': 'application/json',
+//                     'X-Client-Id': process.env.APP_ID,
+//                     'X-Client-Secret': process.env.SECRET_KEY,
+//                 },
+//             }
+//         );
+//         const { payment_session_id } = response.data;
+//         console.log(payment_session_id)
+//         res.status(200).json({ payment_session_id });
+//     } catch (error) {
+//         console.error('Error creating Cashfree order:', error.response?.data || error.message);
+//         res.status(500).json({ error: 'Failed to create order' });
+//     }
+// };
+const createOrder = async (req, res) => {
+    try {
+        const { customerName, customerEmail, customerPhone, amount, productId,username } = req.body;
+        console.log("Received Request:", req.body);
+
+        const orderRequest = {
+            order_amount: amount,
+            order_currency: "INR",
+            order_version: "2023-08-01", 
+            customer_details: {
+                customer_id: productId,
+                customer_name: customerName,
+                customer_email: customerEmail,
+                customer_phone: customerPhone,
+            },
+            order_meta: {
+                return_url: `http://localhost:5173/user/${username}/Store`,  // Replace with your return URL
+            },
+            order_note: `Order for product ID: ${productId}`,
+        };
+
+        console.log("Order Request:", orderRequest );
+
+        // Create the order using Cashfree
+        const response = Cashfree.PGCreateOrder("2023-08-01", orderRequest ).then((response) => {
+            console.log('Order Created successfully:',response.data)
+            console.log(response.data.payment_session_id)
+            if(response.data){
+                const payment_session_id = response.data.payment_session_id;
+                
+        console.log("Payment Session ID:", payment_session_id);
+                res.status(200).json({message:"payment_session_id",payment_session_id})
+               }
+            
+        }).catch((error) => {
+            console.error('Error:', error.response.data.message);
+        });
+      
+
+        
+    } catch (error) {
+        console.error("Error creating order:", error);
+
+        // Send back the full error response for debugging
+        res.status(500).json({
+            error: "Failed to create order.",
+            details: error.response ? error.response.data : error.message,
+        });
+    }
+};
+
+
+
+
+
+export {createOrder,deleteitem,storeitems,additem,useritems,mystoreitem,createownstore,register ,friends, Login,getuserprofile,logout,audioupload,getMessages, usernametoid,feedback,getuseremail,
     changepassword,uploadprofiepic,serachuser,getuserbyid,followerscount,followingcount,deletemutualfollowing,followback,deletefollowing
     ,getotherprofile,getcurrentuser,Addfriend,Acceptfriend,Declinefriend,getnotifications,getuserid,checkfriend};

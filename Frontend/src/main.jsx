@@ -8,12 +8,14 @@ import Profile from './components/Profile.jsx';
 import Home from './components/Home.jsx';
 import Messages from './components/Messages.jsx';
 import Friends from './components/Friends.jsx';
-import Newpassword from './components/Newpassword.jsx';
 import Userprofile from './components/Userprofile.jsx';
 import Chatbox from './components/Chatbox.jsx';
 import App from './App';
 import { Provider } from 'react-redux';
-import { store } from './components/Store';
+import Shop from './components/Shop.jsx';
+import { store } from './components/Store.js';
+import ReelsPage from './components/ReelsPage.jsx';
+
 // import process from 'process';
 // import path from 'path-browserify';
 
@@ -41,12 +43,7 @@ const router = createBrowserRouter([
       {
         path: 'Profile',
         element: <Profile />,
-        children: [
-          {
-            path: 'Newpassword',
-            element: <Newpassword />,
-          },
-        ],
+       
       },
       {
         path: 'Messages',
@@ -66,12 +63,23 @@ const router = createBrowserRouter([
         path: 'userprofile/:profilename',
         element: <Userprofile />,
       },
+      {
+        path:'Store',
+        element:<Shop/>,
+        // loader:{iscasualstore:true}
+      },
+      {
+        path:'Reels',
+        element:<ReelsPage/>
+      }
+      
     ],
   },
   {
     path: '/Signup',
     element: <Signup />,
   },
+ 
  
 ]);
 

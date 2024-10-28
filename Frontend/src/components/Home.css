@@ -1,0 +1,11 @@
+@media (max-width: 639px) {
+    .custom-flex {
+      display: flex;
+      flex-direction: column;
+      justify-items: space-evenly;
+    }
+    .custom-size{
+        display: none;
+    }
+    
+  }
