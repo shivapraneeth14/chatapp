@@ -45,7 +45,7 @@ function Messages() {
 
   return (
     <div className="h-screen flex justify-evenly items-start px-4 py-2 bg-gray-100">
-      {/* Sidebar */}
+   
       <div className="h-[calc(100vh-60px)] rounded-lg border border-slate-300 shadow-lg bg-white min-w-64 w-1/4">
         <div>
           <div className="relative px-4 py-3 border-b border-slate-200 w-full bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-t-lg">
@@ -65,7 +65,6 @@ function Messages() {
         </div>
       </div>
 
-      {/* Chat area */}
       <div className="min-h-[calc(100vh-60px)] px-2 rounded-lg w-full bg-white shadow-lg">
         <Outlet />
       </div>

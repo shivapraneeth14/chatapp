@@ -13,6 +13,7 @@ import Store from "../Models/Store.model.js";
 import Product from "../Models/Product.model.js";
 import { Cashfree } from "cashfree-pg"; 
 import axios from "axios"
+import Post from "../Models/Post.model.js";
 const CASHFREE_BASE_URL = 'https://sandbox.cashfree.com/pg';
 sgMail.setApiKey(process.env.SENDGRID_API_KEY)
 const client = new AssemblyAI({
@@ -901,9 +902,8 @@ const createownstore = async (req, res) => {
     const userid = user._id;
     console.log("userid", userid);
 
-    // Create a new store instance
     const store = new Store({
-        owner: owner,  // Use user ID instead of username
+        owner: owner, 
         storeName,
         email,
         description,
@@ -1074,9 +1074,7 @@ const useritems = async (req, res) => {
 
         const username = user.username;
 
-        // Check if the user has a store
         if (user.store) {
-            // Find the store owned by the user
             const store = await Store.findOne({ owner: username });
             if (!store) {
                 return res.status(404).json({ message: "Store not found" });
@@ -1084,20 +1082,18 @@ const useritems = async (req, res) => {
 
             const storeid = store._id;
 
-            // Find products owned by the user in their store
             const products = await Product.find({ ownerid: userid, storeId: storeid });
 
             if (products.length === 0) {
                 return res.status(404).json({ message: "No products found for this user in the store" });
             }
 
-            // Return the products found
             return res.status(200).json({ products });
         } else {
             return res.status(404).json({ message: "User does not own a store" });
         }
     } catch (error) {
-        console.error(error); // Log the error for debugging
+        console.error(error)
         return res.status(500).json({ message: "Internal Server Error" });
     }
 };
@@ -1172,14 +1168,13 @@ const createOrder = async (req, res) => {
                 customer_phone: customerPhone,
             },
             order_meta: {
-                return_url: `http://localhost:5173/user/${username}/Store`,  // Replace with your return URL
+                return_url: `http://localhost:5173/user/${username}/Store`,  
             },
             order_note: `Order for product ID: ${productId}`,
         };
 
         console.log("Order Request:", orderRequest );
 
-        // Create the order using Cashfree
         const response = Cashfree.PGCreateOrder("2023-08-01", orderRequest ).then((response) => {
             console.log('Order Created successfully:',response.data)
             console.log(response.data.payment_session_id)
@@ -1199,18 +1194,85 @@ const createOrder = async (req, res) => {
     } catch (error) {
         console.error("Error creating order:", error);
 
-        // Send back the full error response for debugging
         res.status(500).json({
             error: "Failed to create order.",
             details: error.response ? error.response.data : error.message,
         });
     }
 };
+const addmedia = async (req, res) => {
+    try {
+      const { description, userid } = req.body;
+      const media = req.file;
+      
+      if (!media) {
+        return res.status(400).json({ message: "No file uploaded." });
+      }
+  
+      const mediapath = media.path;
+      console.log("media path:", mediapath);
+  
+      const isVideo = media.mimetype.startsWith("video/");
+      const isImage = media.mimetype.startsWith("image/");
+      
+      if (!isVideo && !isImage) {
+        return res.status(400).json({ message: "Invalid file type. Only images and videos are allowed." });
+      }
+  
+      const file = await fileUploader(mediapath);
+      const fileUrl = file.secure_url;
+  
+      const post = new Post({
+        userid:userid,
+        description:description,
+        description:description,
+        [isVideo ? "video" : "image"]: fileUrl,
+      });
+  
+      await post.save();
+  
+      return res.status(201).json({ message: "Media added successfully", post });
+  
+    } catch (error) {
+      console.error("Error in addmedia:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  };
+  const finduserid= async(req,res)=>{
+    try {
+        const { username } = req.query
+        if(!username){
+            return res.status(500).json({message:"no username"})
+        }
+        const user = await User.findOne({username:username})
+        if(!user){
+            return res.status(500).json({message:"no user profile found"})
+        }
+        res.status(200).json({message:"user found",user})
+    } catch (error) {
+        return res.status(500).json({message:"Internal server error"})
+        console.log(error)
+    }
+  }
+
+  const allposts = async(req,res)=>{
+    try {
+        const posts = await Post.find()
+        console.log(posts)
+        if(!posts){
+            return res.status(500).json({message:"no posts ofund"})
+        }
+        res.status(200).json({message:"posts found",posts})
+    } catch (error) {
+        return res.status(500).json({message:"INternal Server Error"})
+        console.log(error)
+    }
+  }
 
 
 
 
 
-export {createOrder,deleteitem,storeitems,additem,useritems,mystoreitem,createownstore,register ,friends, Login,getuserprofile,logout,audioupload,getMessages, usernametoid,feedback,getuseremail,
+export {allposts,finduserid,addmedia,createOrder,deleteitem,storeitems,additem,useritems,mystoreitem,createownstore,register ,friends, Login,getuserprofile,logout,audioupload,getMessages, usernametoid,feedback,getuseremail,
     changepassword,uploadprofiepic,serachuser,getuserbyid,followerscount,followingcount,deletemutualfollowing,followback,deletefollowing
     ,getotherprofile,getcurrentuser,Addfriend,Acceptfriend,Declinefriend,getnotifications,getuserid,checkfriend};

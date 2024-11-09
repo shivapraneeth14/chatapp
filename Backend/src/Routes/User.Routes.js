@@ -1,5 +1,5 @@
 import { Router } from "express";
-import {createOrder,deleteitem,storeitems,additem,mystoreitem, changepassword, getuseremail,logout, register,uploadprofiepic,serachuser,getotherprofile,friends,deletefollowing, usernametoid,getMessages,
+import {allposts,finduserid,addmedia,createOrder,deleteitem,storeitems,additem,mystoreitem, changepassword, getuseremail,logout, register,uploadprofiepic,serachuser,getotherprofile,friends,deletefollowing, usernametoid,getMessages,
   followback,checkfriend,getuserbyid,deletemutualfollowing,followerscount,followingcount,audioupload  ,getcurrentuser,Addfriend,Acceptfriend,Declinefriend,getnotifications,getuserid,
   feedback,createownstore,useritems} from "../Controllers/Usercontroller.js";
 import { Login,getuserprofile } from "../Controllers/Usercontroller.js";
@@ -42,6 +42,9 @@ router.route("/additem").post(upload.single('image'),additem);
 router.route("/storeitem").post(storeitems)
 router.route("/Deleteitem").post(deleteitem)
 router.route("/createOrder").post(createOrder)
+router.route("/addmedia").post(upload.single('media'),addmedia)
+router.route("/findid").get(finduserid)
+router.route("/allposts").get(allposts)
 
 
 

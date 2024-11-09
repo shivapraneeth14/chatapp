@@ -14,10 +14,9 @@ function Shop() {
   const Storebelongto = location.state?.Storebelongto || null;
   const [items, setstorebelongtoitems] = useState([]);
   const [allitems, setallitems] = useState([]);
-  const [selectedItem, setSelectedItem] = useState(null); // Track selected item for order
-  const [showOrderForm, setShowOrderForm] = useState(false); // Track visibility of order form
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [showOrderForm, setShowOrderForm] = useState(false); 
 
-  // Fetch all items
   useEffect(() => {
     const getAllItems = async () => {
       try {
@@ -47,7 +46,6 @@ function Shop() {
     fetchUserProfile();
   }, [username, isUserStore]);
 
-  // Fetch store items if a store belongs to the user
   useEffect(() => {
     const getStoreItems = async () => {
       try {

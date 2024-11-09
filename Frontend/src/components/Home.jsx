@@ -1,16 +1,30 @@
 import React, { useState, useEffect } from 'react'; 
 import { useParams } from 'react-router-dom'; 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faHeart, faComment, faShare, faBagShopping, faCrown, faMicrophone, faArrowRight } from '@fortawesome/free-solid-svg-icons';
+import { faHeart, faComment, faShare } from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
 import './Home.css';
-import StoryModal from './StoryModal'; // Import the StoryModal component
+import StoryModal from './StoryModal'; 
 
 function Home() {
   const { username } = useParams();
   const [feedback, setFeedback] = useState("");
   const [email, setEmail] = useState('');
-  const [selectedStory, setSelectedStory] = useState(null); // State to hold the selected story for the modal
+  const [selectedStory, setSelectedStory] = useState(null);
+  const [posts, setPosts] = useState([]);
+
+  useEffect(() => {
+    const getPosts = async () => {
+      try {
+        const response = await axios.get("http://localhost:8000/api/allposts");
+        console.log(response);
+        setPosts(response.data.posts);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    getPosts();
+  }, []);
 
   useEffect(() => {
     const getEmail = async () => {
@@ -45,24 +59,17 @@ function Home() {
     { id: 3, name: 'Charlie', image: 'https://placekitten.com/102/102' },
   ];
 
-  const posts = [
-    { id: 1, user: 'Alice', content: 'Loving my new store!', image: 'https://placekitten.com/400/300' },
-    { id: 2, user: 'Bob', content: 'Amazing deals are live now!', image: 'https://placekitten.com/401/301' },
-  ];
-
-  // Function to open the modal with a selected story
   const openStoryModal = (story) => {
     setSelectedStory(story);
   };
 
-  // Function to close the modal
   const closeStoryModal = () => {
     setSelectedStory(null);
   };
 
   return (
     <div className="min-h-screen bg-white p-6">
-      {/* Stories Section */}
+     
       <div className="flex space-x-6 overflow-x-auto pb-6 border-b-2 border-gray-300">
         {stories.map((story) => (
           <div key={story.id} className="flex flex-col items-center cursor-pointer" onClick={() => openStoryModal(story)}>
@@ -76,23 +83,22 @@ function Home() {
         ))}
       </div>
 
-      {/* Posts Section */}
       <div className="space-y-8 mt-8">
-        {posts.map((post) => (
+        {posts.filter(post => post.image).map((post) => (
           <div 
-            key={post.id} 
+            key={post._id} 
             className="bg-white border border-gray-300 rounded-lg shadow-sm p-6 relative"
           >
             <div className="absolute top-4 left-4 flex items-center space-x-2">
               <img 
-                src={`https://placekitten.com/50/50?user=${post.user}`} 
-                alt={post.user} 
+                src={post.image} 
+                alt={post.userid} 
                 className="w-10 h-10 rounded-full border border-gray-300"
               />
               <p className="text-gray-800 font-semibold">{post.user}</p>
             </div>
 
-            <p className="text-gray-600 mb-4 mt-12">{post.content}</p>
+            <p className="text-gray-600 mb-4 mt-12">{post.description}</p>
             <img 
               src={post.image} 
               alt="Post" 
@@ -116,11 +122,8 @@ function Home() {
           </div>
         ))}
       </div>
-
-      {/* Story Modal */}
       <StoryModal story={selectedStory} onClose={closeStoryModal} />
 
-      {/* Feedback Section */}
       <div className="mt-12 flex w-full">
         <input
           placeholder="Your feedback..."

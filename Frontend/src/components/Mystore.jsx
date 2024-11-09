@@ -115,7 +115,6 @@ const deleteitem= async(id)=>{
         </button>
       </div>
 
-      {/* Item List */}
       <div className="text-center text-2xl font-bold mb-6">My Items for Sale</div>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {items.map((item) => (
@@ -141,13 +140,12 @@ const deleteitem= async(id)=>{
         ))} 
       </div>
 
-      {/* Add Item Modal */}
       {showAddModal && (
         <div className="fixed w-auto h-auto inset-0 flex items-center justify-center z-50 bg-gray-900 bg-opacity-50">
           <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
             <h2 className="text-2xl font-bold mb-4">Add New Item</h2>
             <form onSubmit={handleAddItem}>
-              {/* Name */}
+             
               <div className="mb-4">
                 <label className="block text-gray-700 mb-2">Item Name</label>
                 <input
@@ -166,7 +164,6 @@ const deleteitem= async(id)=>{
                 />
               </div>
 
-              {/* Description */}
               <div className="mb-4">
                 <label className="block text-gray-700 mb-2">Description</label>
                 <textarea
@@ -185,7 +182,6 @@ const deleteitem= async(id)=>{
                 />
               </div>
 
-              {/* Price */}
               <div className="mb-4">
                 <label className="block text-gray-700 mb-2">Price</label>
                 <input
@@ -205,7 +201,6 @@ const deleteitem= async(id)=>{
                 />
               </div>
 
-              {/* Stock */}
               <div className="mb-4">
                 <label className="block text-gray-700 mb-2">Stock</label>
                 <input
@@ -225,7 +220,6 @@ const deleteitem= async(id)=>{
                 />
               </div>
 
-              {/* Category */}
               <div className="mb-4">
                 <label className="block text-gray-700 mb-2">Category</label>
                 <input
@@ -244,7 +238,6 @@ const deleteitem= async(id)=>{
                 />
               </div>
 
-              {/* Image Upload */}
               <div className="mb-4">
                 <label className="block text-gray-700 mb-2">Upload Image</label>
                 <input
@@ -260,7 +253,6 @@ const deleteitem= async(id)=>{
                 />
               </div>
 
-              {/* Action Buttons */}
               <div className="flex justify-end">
                 <button
                   type="button"
@@ -281,7 +273,6 @@ const deleteitem= async(id)=>{
         </div>
       )}
 
-      {/* Detail Modal */}
       {showDetailModal && selectedItem && (
         <div className="fixed inset-0 flex items-center justify-center z-50 bg-gray-900 bg-opacity-50">
           <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-2xl flex">

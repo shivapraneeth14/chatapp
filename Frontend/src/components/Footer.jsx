@@ -1,10 +1,29 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHome, faPlusCircle, faStore, faFilm } from '@fortawesome/free-solid-svg-icons';
 import AddMediaModal from './Models/AddMediaModal';
+import { useParams } from 'react-router-dom';
+import axios from 'axios'
 
 function Footer() {
+  const {username} = useParams()
+  const [userid,setuserid] = useState()
+  useEffect(()=>{
+    const getuserid = async () => {
+      try {
+          console.log("Username:", username); 
+          const response = await axios.get("http://localhost:8000/api/findid", {
+              params: { username }
+          });
+          console.log(response.data);
+          setuserid(response.data.user._id);
+      } catch (error) {
+          console.log("Error fetching user ID:", error); 
+      }
+  };
+    getuserid();
+  },[])
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
@@ -24,7 +43,7 @@ function Footer() {
           <span className="font-semibold text-sm mt-1">Reels</span>
         </Link>
         
-        {/* Add Button to open modal */}
+      
         <button
           onClick={() => setIsModalOpen(true)}
           className="flex flex-col items-center text-gray-700 hover:text-black transform hover:scale-105 transition-all duration-300 focus:outline-none"
@@ -43,7 +62,7 @@ function Footer() {
         </Link>
       </div>
       
-      {isModalOpen && <AddMediaModal onClose={() => setIsModalOpen(false)} />}
+      {isModalOpen && <AddMediaModal userid={userid}onClose={() => setIsModalOpen(false)} />}
     </div>
   );
 }
