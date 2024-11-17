@@ -12,7 +12,7 @@ function Messages() {
   useEffect(() => {
     const getuserid = async () => {
       try {
-        const response = await axios.post("http://localhost:8000/api/Getuserid", { username })
+        const response = await axios.post(`${import.meta.env.VITE_FRONTEND_URL}/api/Getuserid`, { username })
         setuserid(response.data.user._id)
         console.log('user id',response.data.user._id);
       } catch (error) {
@@ -25,7 +25,7 @@ function Messages() {
   useEffect(() => {
     const getfriends = async () => {
       try {
-        const response = await axios.post("http://localhost:8000/api/friends", { userid:userid })
+        const response = await axios.post(`${import.meta.env.VITE_FRONTEND_URL}/api/friends`, { userid:userid })
         console.log("sent userid",userid);
         console.log("response for frined",response)
         const frienddetails = response.data.userfriends

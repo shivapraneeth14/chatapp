@@ -14,7 +14,7 @@ const server = http.createServer(app);
 // });
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:5173", 
+    origin: `${process.env.BACKEND_URL}`, 
     methods: ["GET", "POST"],
   },
 });
@@ -108,6 +108,7 @@ connect()
 .then(()=>{
     server.listen(process.env.PORT  ,()=>{
       console.log(`server is running ${process.env.PORT}`)
+      console.log(`${process.env.BACKEND_URL}`)
     })
   })
   .catch((err)=>{

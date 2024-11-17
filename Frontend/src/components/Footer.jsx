@@ -13,7 +13,7 @@ function Footer() {
     const getuserid = async () => {
       try {
           console.log("Username:", username); 
-          const response = await axios.get("http://localhost:8000/api/findid", {
+          const response = await axios.get(`${import.meta.env.VITE_FRONTEND_URL}/api/findid`, {
               params: { username }
           });
           console.log(response.data);

@@ -27,7 +27,7 @@ const OrderForm = ({ item, onClose }) => {
     
             console.log("Order Details:", orderDetails);
     
-            const response = await axios.post('http://localhost:8000/api/createOrder', {
+            const response = await axios.post(`${import.meta.env.VITE_FRONTEND_URL}/api/createOrder`, {
                 customerName,
                 customerEmail,
                 customerPhone,

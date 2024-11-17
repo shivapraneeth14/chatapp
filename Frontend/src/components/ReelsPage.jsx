@@ -8,7 +8,7 @@ function ReelsPage() {
   useEffect(() => {
     const getPosts = async () => {
       try {
-        const response = await axios.get("http://localhost:8000/api/allposts");
+        const response = await axios.get(`${import.meta.env.VITE_FRONTEND_URL}/api/allposts`);
         
         const videoPosts = response.data.posts.filter(post => post.video);
         

@@ -15,7 +15,7 @@ function Header() {
 
   const search = async () => {
     try {
-      const response = await axios.post('http://localhost:8000/api/Search', { searchkey: searchKey });
+      const response = await axios.post(`${import.meta.env.VITE_FRONTEND_URL}/api/Search`, { searchkey: searchKey });
       const filteredData = response.data.filteredresult;
       setSearchResults(filteredData);
     } catch (error) {

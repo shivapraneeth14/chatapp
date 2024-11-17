@@ -20,7 +20,7 @@ function Shop() {
   useEffect(() => {
     const getAllItems = async () => {
       try {
-        const response = await axios.post('http://localhost:8000/api/storeitem');
+        const response = await axios.post(`${import.meta.env.VITE_FRONTEND_URL}/api/storeitem`);
         console.log(response);
         setallitems(response.data.products);
       } catch (error) {
@@ -33,7 +33,7 @@ function Shop() {
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/api/Profile', {
+        const response = await axios.get(`${import.meta.env.VITE_FRONTEND_URL}/api/Profile`, {
           params: { username },
         });
         console.log('username', username);
@@ -49,7 +49,7 @@ function Shop() {
   useEffect(() => {
     const getStoreItems = async () => {
       try {
-        const response = await axios.post('http://localhost:8000/api/useritem', {
+        const response = await axios.post(`${import.meta.env.VITE_FRONTEND_URL}/api/useritem`, {
           userid: Storebelongto,
         });
         console.log(response);

@@ -16,7 +16,7 @@ function Home() {
   useEffect(() => {
     const getPosts = async () => {
       try {
-        const response = await axios.get("http://localhost:8000/api/allposts");
+        const response = await axios.get(`${import.meta.env.VITE_FRONTEND_URL}/api/allposts`);
         console.log(response);
         setPosts(response.data.posts);
       } catch (error) {
@@ -29,7 +29,7 @@ function Home() {
   useEffect(() => {
     const getEmail = async () => {
       try {
-        const response = await axios.post("http://localhost:8000/api/getuseremail", { username });
+        const response = await axios.post(`${import.meta.env.VITE_FRONTEND_URL}/api/getuseremail`, { username });
         setEmail(response.data.email);
       } catch (error) {
         console.error(error);
@@ -46,7 +46,7 @@ function Home() {
       text: feedback,
     };
     try {
-      const response = await axios.post("http://localhost:8000/api/sendfeedback", msg);
+      const response = await axios.post(`${import.meta.env.VITE_FRONTEND_URL}/api/sendfeedback`, msg);
       console.log(response);
     } catch (error) {
       console.error(error);

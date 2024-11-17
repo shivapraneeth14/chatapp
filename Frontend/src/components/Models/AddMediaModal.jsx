@@ -40,7 +40,7 @@ function AddMediaModal({ onClose, userid }) {
 
     try {
       console.log("fileuploaduserid",userid)
-      const response = await axios.post("http://localhost:8000/api/addmedia", formData, {
+      const response = await axios.post(`${import.meta.env.VITE_FRONTEND_URL}/api/addmedia`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },

@@ -12,7 +12,7 @@ function Notification() {
   useEffect(() => {
     const getuserid = async () => {
       try {
-        const response = await axios.post('http://localhost:8000/api/Getuserid', { username });
+        const response = await axios.post(`${import.meta.env.VITE_FRONTEND_URL}/api/Getuserid`, { username });
         console.log(response.data.user._id);
         setuserid(response.data.user._id);
       } catch (error) {
@@ -25,7 +25,7 @@ function Notification() {
   useEffect(() => {
     const notify = async () => {
       try {
-        const response = await axios.post('http://localhost:8000/api/Notifications', { userid });
+        const response = await axios.post(`${import.meta.env.VITE_FRONTEND_URL}/api/Notifications`, { userid });
         console.log('front end response', response.data);
         const data = response.data;
         const id = data.map((data) => data._id);
@@ -44,7 +44,7 @@ function Notification() {
   useEffect(() => {
     const getfollowerid = async () => {
       try {
-        const response = await axios.post('http://localhost:8000/api/Getuserid', { followerid });
+        const response = await axios.post(`${import.meta.env.VITE_FRONTEND_URL}/api/Getuserid`, { followerid });
         console.log('follower id data', response.data.user);
         setfollowerdata(response.data.user);
       } catch (error) {
@@ -57,7 +57,7 @@ function Notification() {
   const acceptrequest = async () => {
     console.log('accepting request', frienddocid);
     try {
-      const response = await axios.post('http://localhost:8000/api/Acceptfriend', { frienddocid });
+      const response = await axios.post(`${import.meta.env.VITE_FRONTEND_URL}/api/Acceptfriend`, { frienddocid });
       console.log(response);
       console.log('accepted request');
     } catch (error) {
@@ -68,7 +68,7 @@ function Notification() {
   const deleterequest = async () => {
     console.log('deleting request');
     try {
-      const response = await axios.post('http://localhost:8000/api/Declinefriend', { frienddocid });
+      const response = await axios.post(`${import.meta.env.VITE_FRONTEND_URL}/api/Declinefriend`, { frienddocid });
       console.log(response);
       console.log('request deleted');
     } catch (error) {

@@ -25,7 +25,7 @@ function Userprofile() {
     const fetchUserProfile = async ()=>{
       console.log("username ",username)
       try {
-        const response = await axios.get('http://localhost:8000/api/Profile', {
+        const response = await axios.get(`${import.meta.env.VITE_FRONTEND_URL}/api/Profile`, {
           params: { username } 
       });
           console.log("logged in user data",response.data.user)
@@ -51,7 +51,7 @@ const changestatus = ()=>{
 console.log("function in user ", username);
         console.log("function in user ", profilename);
         try {
-            const response = await axios.post(`http://localhost:8000/api/${username}/user/${profilename}`);
+            const response = await axios.post(`${import.meta.env.VITE_FRONTEND_URL}/api/${username}/user/${profilename}`);
             console.log("profile data",response.data.user)
             setUserData(response.data.user);
             setFriendid(response.data.user._id);
@@ -66,7 +66,7 @@ console.log("function in user ", username);
 useEffect(()=>{
   const checkfriend = async ()=>{
     try {
-      const response = await axios.post("http://localhost:8000/api/Checkfriend",{userid,friendid})
+      const response = await axios.post(`${import.meta.env.VITE_FRONTEND_URL}/api/Checkfriend`,{userid,friendid})
       console.log(response)
       console.log("resp",response.data.isFriend)
       setfriendstatus(response.data.isFriend)
@@ -91,7 +91,7 @@ useEffect(()=>{
 const friendRequest = async () => {
   console.log("userid",userid,friendid)
     try {
-        const response = await axios.post('http://localhost:8000/api/Addfriend', {
+        const response = await axios.post(`${import.meta.env.VITE_FRONTEND_URL}/api/Addfriend`, {
           userid, 
           friendid
         });
@@ -105,7 +105,7 @@ const friendRequest = async () => {
 const Declinerequest = async ()=>{
 
       try {
-         const response  = await axios.post('http://localhost:8000/api/Declinefriend',{frienddocid})
+         const response  = await axios.post(`${import.meta.env.VITE_FRONTEND_URL}/api/Declinefriend`,{frienddocid})
          console.log(response)
          console.log("delledt request")
          } catch (error) {
@@ -134,7 +134,7 @@ useEffect(()=>{
 },[deletemutualfollow])
 const delfollowing = async()=>{
   try {
-    const response = await axios.post("http://localhost:8000/api/Deletemutualfollowing",{userid:userid,
+    const response = await axios.post(`${import.meta.env.VITE_FRONTEND_URL}/api/Deletemutualfollowing`,{userid:userid,
       friendid:friendid
     })
     console.log(response)
@@ -161,7 +161,7 @@ useEffect(()=>{
 },[addfollowback])
 const folback = async()=>{
   try {
-    const response = await axios.post("http://localhost:8000/api/Followback",{userid:userid,
+    const response = await axios.post(`${import.meta.env.VITE_FRONTEND_URL}/api/Followback`,{userid:userid,
     friendid:friendid
   })
   console.log(response)
@@ -173,7 +173,7 @@ const folback = async()=>{
 useEffect(()=>{
   const getfollowerscount = async()=>{
    try {
-     const response = await axios.post("http://localhost:8000/api/Followersocount",{profilename})
+     const response = await axios.post(`${import.meta.env.VITE_FRONTEND_URL}/api/Followersocount`,{profilename})
      console.log("followercount",response.data.count[0].
      FollowerCount)
      setfollowersocunt(response.data.count[0].
@@ -188,7 +188,7 @@ useEffect(()=>{
 useEffect(()=>{
   const getfollowingcount = async ()=>{
     try {
-      const response = await axios.post("http://localhost:8000/api/Followingcount",{profilename})
+      const response = await axios.post(`${import.meta.env.VITE_FRONTEND_URL}/api/Followingcount`,{profilename})
       console.log("following coount",response.data.count[0].
       FollowingCount)
       setfollowingcount(response.data.count[0].

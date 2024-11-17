@@ -21,7 +21,7 @@ function Profile() {
   });
 
   const logoutprofile = () => {
-    axios.get('http://localhost:8000/api/Logout')
+    axios.get(`${import.meta.env.VITE_FRONTEND_URL}/api/Logout`)
       .then(() => {
         navigate("/");
       })
@@ -34,7 +34,7 @@ function Profile() {
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/api/Profile', { params: { username } });
+        const response = await axios.get(`${import.meta.env.VITE_FRONTEND_URL}/api/Profile`, { params: { username } });
         setUserData(response.data.user);
         setloggedinuser(response.data.user.username);
         setuserid(response.data.user._id);
@@ -51,7 +51,7 @@ function Profile() {
     formData.append('profilepic', profilepic);
 
     try {
-      const response = await axios.post('http://localhost:8000/api/Profilepic', formData, {
+      const response = await axios.post(`${import.meta.env.VITE_FRONTEND_URL}/api/Profilepic`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
@@ -71,7 +71,7 @@ function Profile() {
 
   const handleSubmitStoreDetails = async () => {
     try {
-      const response = await axios.post('http://localhost:8000/api/createstore', {
+      const response = await axios.post(`${import.meta.env.VITE_FRONTEND_URL}/api/createstore`, {
         ...storeDetails,
         owner: loggedinuser 
       });

@@ -1,7 +1,7 @@
 import React from 'react';
 
 function StoryModal({ story, onClose }) {
-  if (!story) return null; // Return null if no story is selected
+  if (!story) return null; 
 
   return (
     <div 

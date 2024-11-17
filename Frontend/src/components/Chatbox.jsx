@@ -37,7 +37,7 @@ function Chatbox() {
       try {
       console.log("fecthed username",username)
 
-        const response = await axios.post("http://localhost:8000/api/getuseridbyname", {
+        const response = await axios.post(`${import.meta.env.VITE_FRONTEND_URL}/api/getuseridbyname`, {
          username: username 
         });
         console.log("User ID:", response.data.userid);
@@ -55,7 +55,7 @@ function Chatbox() {
   useEffect(()=>{
     const getmessages = async ()=>{
       try {
-        const response = await axios.post("http://localhost:8000/api/getmessages", { userid:userid, friendid:id });
+        const response = await axios.post(`${import.meta.env.VITE_FRONTEND_URL}/api/getmessages`, { userid:userid, friendid:id });
         console.log("recived messages",response.data.receivedchat);
         console.log("sended messages",response.data.sendedmessage);
         const combined = [
@@ -121,7 +121,7 @@ function Chatbox() {
     }
   };
 
-  const socket = io.connect("http://localhost:8000");
+  const socket = io.connect(`${import.meta.env.VITE_FRONTEND_URL}`);
 useEffect(()=>{
   if(record){
  startrecording()
@@ -199,7 +199,7 @@ useEffect(()=>{
 useEffect(()=>{
   const getuserbyid = async ()=>{
     try {
-      const response = await axios.post("http://localhost:8000/api/Userbyid",{id})
+      const response = await axios.post(`${import.meta.env.VITE_FRONTEND_URL}/api/Userbyid`,{id})
       console.log("response",response.data.user)
       setfrienddata(response.data.user)
    
@@ -227,7 +227,7 @@ useEffect(()=>{
       
       const formData = new FormData();
       formData.append('audio', audioblb, 'audio.wav');
-      const response = await axios.post("http://localhost:8000/api/Transcript", formData, {
+      const response = await axios.post(`${import.meta.env.VITE_FRONTEND_URL}/api/Transcript`, formData, {
         headers: {
             'Content-Type': 'multipart/form-data'
         }

@@ -10,6 +10,8 @@ const[password,setpassword] = useState()
 const [profiledata,setprofiledata] = useState({})
 const [error,seterror] = useState()
 const navigate = useNavigate()
+
+console.log(`${import.meta.env.VITE_FRONTEND_URL}`)
 const handlesubmit = async ()=>{
   const user={
     loginname:loginname,
@@ -17,8 +19,9 @@ const handlesubmit = async ()=>{
   }
 try {
   console.log("sending")
+  console.log(`${import.meta.env.VITE_FRONTEND_URL}`)
   console.log(user)
-  const response = await axios.post('http://localhost:8000/api/Login', user);
+  const response = await axios.post(`${import.meta.env.VITE_FRONTEND_URL}/api/Login`, user);
   console.log(response.data.loggedinuser.username)
   setusername(response.data.loggedinuser.username)
   console.log(username)

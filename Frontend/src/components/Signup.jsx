@@ -21,7 +21,7 @@ function Signup() {
   
     try {
       console.log("sent");
-      const response = await axios.post('http://localhost:8000/api/register', user);
+      const response = await axios.post(`${import.meta.env.VITE_FRONTEND_URL}/api/register`, user);
       console.log(response.data);
       console.log("read");
       navigate("/")

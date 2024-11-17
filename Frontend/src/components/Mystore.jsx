@@ -14,7 +14,7 @@ function MyStore() {
     const getmystore = async()=>{
       try {
         console.log("getting my store items")
-        const response  = await axios.post("http://localhost:8000/api/mystoreitems",{username:username})
+        const response  = await axios.post(`${import.meta.env.VITE_FRONTEND_URL}/api/mystoreitems`,{username:username})
         console.log(response.data.products)
         setItems(response.data.products)
       } catch (error) {
@@ -82,7 +82,7 @@ function MyStore() {
     }
 
     try {
-        const response = await axios.post("http://localhost:8000/api/additem", formData, {
+        const response = await axios.post(`${import.meta.env.VITE_FRONTEND_URL}/api/additem`, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
             },
@@ -97,7 +97,7 @@ function MyStore() {
 };
 const deleteitem= async(id)=>{
   try {
-    const response = await axios.post("http://localhost:8000/api/Deleteitem",{username:username, productid:id})
+    const response = await axios.post(`${import.meta.env.VITE_FRONTEND_URL}/api/Deleteitem`,{username:username, productid:id})
     console.log(response)
   } catch (error) {
     console.log(error)
