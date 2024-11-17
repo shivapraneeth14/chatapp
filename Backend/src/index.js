@@ -1,99 +1,87 @@
-import dotenv from "dotenv"
+import dotenv from "dotenv";
 import connect from "./db/index.js";
 import app from "./app.js";
-import {Server} from "socket.io"
-import {createServer} from "http"
+import { Server } from "socket.io";
+import { createServer } from "http";
 import http from 'http';  
-import { AssemblyAI } from 'assemblyai'
+import { AssemblyAI } from 'assemblyai';
 import Chat from "./Models/Chat.model.js";
 
+dotenv.config({ path: "./env" });
 
 const server = http.createServer(app);
-// const client = new AssemblyAI({
-//   apiKey: process.env.ASSLEMBLY_API_KET
-// });
+
 const io = new Server(server, {
   cors: {
     origin: `${process.env.BACKEND_URL}`, 
     methods: ["GET", "POST"],
   },
 });
-let activeusers = []
-let roomid ;
+
+let activeusers = [];
+let roomid;
+
+// Track database connection status
+let isDatabaseConnected = false;
 
 io.on('connection', (socket) => {
-  console.log(`socket id`,socket.id)
+  console.log(`Socket ID: ${socket.id}`);
   
-  socket.on("join_room", (roomid,username) => {
-    console.log("join romm",roomid,username)
-    const newuser = {
-      roomid:roomid,
-      username:username,
-      socketId: socket.id
-    }
-    activeusers.push(newuser)
-    console.log(activeusers)
+  socket.on("join_room", (roomid, username) => {
+    console.log("Join room:", roomid, username);
+    const newuser = { roomid, username, socketId: socket.id };
+    activeusers.push(newuser);
+    console.log(activeusers);
 
-    if(!roomid){
-      console.log("no room id found")
+    if (!roomid) {
+      console.log("No room ID found");
     }
     socket.join(roomid);
     console.log(`User joined room: ${roomid}`);
   });
 
-
-  socket.on("message", async (input, friendname, audiourl,transcriptText,userid,id) => {
-    
-    
+  socket.on("message", async (input, friendname, audiourl, transcriptText, userid, id) => {
     if (!friendname) {
       socket.broadcast.emit("receive", { text: input }, audiourl);
-      console.log(input);
-      console.log(audiourl);
+      console.log(input, audiourl);
     } else {
-      console.log("entered room");
-      console.log('friendname', friendname);
+      console.log("Entered room:", friendname);
       
       const user = activeusers.find(user => user.username === friendname);
       
       if (!user) {
         const chat = new Chat({
-          sender:userid,
-          receiver:id,
-          text:input ,
-          audiourl:audiourl,
-          audiotext:transcriptText,
-        })
-        console.log("chat saved",chat)
-        if(!chat){
-          res.status(400).json({message:"chat not saved"})
+          sender: userid,
+          receiver: id,
+          text: input,
+          audiourl,
+          audiotext: transcriptText,
+        });
+        console.log("Chat saved:", chat);
+        if (!chat) {
+          res.status(400).json({ message: "Chat not saved" });
         }
 
-        await chat.save() 
-
+        await chat.save();
         return;
       }
   
       const room_id = user.roomid;
       
-      
       if (audiourl) {
-        // const cleanedUrl = audiourl.replace('blob:', '');
-        // console.log('Cleaned URL:', cleanedUrl);
-        
         socket.to(room_id).emit('receive', '', audiourl, transcriptText);
-
-        
       }
       
       if (input) {
-        socket.to(room_id).emit("receive",  input );
-        console.log("message sent", input);
+        socket.to(room_id).emit("receive", input);
+        console.log("Message sent:", input);
       }
     }
   });
+
   socket.on('disconnect', () => {
     const disconnectedUser = activeusers.find(user => user.socketId === socket.id);
-    console.log("disocnnect user",disconnectedUser)
+    console.log("Disconnect user:", disconnectedUser);
     if (disconnectedUser) {
       activeusers = activeusers.filter(user => user.socketId !== socket.id);
       console.log(`${disconnectedUser.username} disconnected`);
@@ -101,19 +89,20 @@ io.on('connection', (socket) => {
   });
 });
 
-dotenv.config({
-    path:"./env"
-})
-connect()
-.then(()=>{
-    server.listen(process.env.PORT  ,()=>{
-      console.log(`server is running ${process.env.PORT}`)
-      console.log(`${process.env.BACKEND_URL}`)
+// Connect to the database if not already connected
+if (!isDatabaseConnected) {
+  connect()
+    .then(() => {
+      isDatabaseConnected = true; // Mark as connected
+      server.listen(process.env.PORT, () => {
+        console.log(`Server is running on port ${process.env.PORT}`);
+        console.log(`Backend URL: ${process.env.BACKEND_URL}`);
+      });
     })
-  })
-  .catch((err)=>{
-    console.log("mogngo connection eroor",err)
-  })
+    .catch((err) => {
+      console.log("MongoDB connection error:", err);
+    });
+}
 
 
 
