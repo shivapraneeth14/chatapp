@@ -1,6 +1,6 @@
 import dotenv from "dotenv";
 import connect from "./db/index.js";
-import app from "./app.js";
+import app from "./app.js"; 
 import { Server } from "socket.io";
 import { createServer } from "http";
 import http from 'http';  
@@ -8,6 +8,10 @@ import { AssemblyAI } from 'assemblyai';
 import Chat from "./Models/Chat.model.js";
 
 dotenv.config({ path: "./env" });
+
+app.get('/', (req, res) => {
+  res.send('Hello, world!');
+});
 
 const server = http.createServer(app);
 
@@ -21,7 +25,6 @@ const io = new Server(server, {
 let activeusers = [];
 let roomid;
 
-// Track database connection status
 let isDatabaseConnected = false;
 
 io.on('connection', (socket) => {
@@ -88,12 +91,13 @@ io.on('connection', (socket) => {
     }
   });
 });
-
-// Connect to the database if not already connected
+app.get('/', (req, res) => {
+  res.send('Hello, world!');
+});
 if (!isDatabaseConnected) {
   connect()
     .then(() => {
-      isDatabaseConnected = true; // Mark as connected
+      isDatabaseConnected = true;
       server.listen(process.env.PORT, () => {
         console.log(`Server is running on port ${process.env.PORT}`);
         console.log(`Backend URL: ${process.env.BACKEND_URL}`);
@@ -103,18 +107,3 @@ if (!isDatabaseConnected) {
       console.log("MongoDB connection error:", err);
     });
 }
-
-
-
-
-  // try {
-        //   const transcript = await client.transcripts.transcribe({ audio_url: cleanedUrl });
-        //   const transcriptText = transcript.text;
-        //   if(transcriptText === null){
-        //     console.log("error in transcipted text",transcript.error)
-        //   }
-        //   console.log('Backend audio URL:', audiourl);
-        //   console.log('Transcript text:', transcriptText);
-        // } catch (error) {
-        //   console.error('Error during transcription:', error);
-        // }
